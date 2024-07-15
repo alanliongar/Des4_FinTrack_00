@@ -1,5 +1,5 @@
 package com.example.fintrack
-
+//Primeiro dia: eu criei o item do rv de cada dado, parei na criação do item da rv da categoria (horizontal).
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity

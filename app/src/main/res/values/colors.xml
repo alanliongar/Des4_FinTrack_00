@@ -16,4 +16,5 @@
     <color name="medium_orange">#FF5726</color>
     <color name="brown">#7A5548</color>
     <color name="grey">#607D8A</color>
+    <color name="fill_ico">#FF000000</color>
 </resources>
