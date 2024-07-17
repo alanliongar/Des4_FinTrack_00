@@ -1,6 +1,6 @@
 package com.example.fintrack
 
-data class cat_data(
+data class CatData(
     val name: String,
     val color: Int,
     val isSelected: Boolean

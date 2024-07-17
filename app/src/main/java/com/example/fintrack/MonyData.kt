@@ -1,6 +1,6 @@
 package com.example.fintrack
 
-data class mony_data(
+data class MonyData(
     val name: String,
     val category: String,
     val value: Double
