@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
-class MonyListAdapter() : ListAdapter<MonyData, MonyListAdapter.MonyViewHolder>(MonyListAdapter) {
+class MonyListAdapter(): ListAdapter<MonyData, MonyListAdapter.MonyViewHolder>(MonyListAdapter) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MonyViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_mony, parent, false)
@@ -29,7 +29,6 @@ class MonyListAdapter() : ListAdapter<MonyData, MonyListAdapter.MonyViewHolder>(
             //resColor.setBackgroundColor(R.color.red) -> Aqui devo incluir a cor bonitinha, que é da categoria.
         }
     }
-
 
     companion object : DiffUtil.ItemCallback<MonyData>() {
         override fun areItemsTheSame(oldItem: MonyData, newItem: MonyData): Boolean {

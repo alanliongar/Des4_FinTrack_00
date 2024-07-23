@@ -2,12 +2,16 @@ package com.example.fintrack
 //Primeiro dia: eu criei o item do rv de cada dado, parei na criação do item da rv da categoria (horizontal).
 //Segundo dia: terminei a parte BEMM BASICA dos layouts, e travei na parte da construção do dado: recuperar a cor pro objeto
 //terceiro dia: terminei de tirar as dúvidas relacionadas a criação dos objetos quando precisa do contexto (pra cor), e criei o adapter da monylist.
-//
+//quarto dia: implementei somente o adapter da categoria, assim como listei 4 categorias. Falta ajustar os itens para ficarem bonitinhos.
 //
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Recycler
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,6 +19,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val (dados, categories) = createObjects(this)
         //nesse ponto no código, ambas as listas de objetos estão criadas.
+        val rvMony: RecyclerView = findViewById<RecyclerView>(R.id.rv_dados)
+        val monyListAdapter = MonyListAdapter()
+        rvMony.adapter = monyListAdapter
+        //rvMony.layoutManager = LinearLayoutManager(this)
+        monyListAdapter.submitList(dados)
+        val rvCat: RecyclerView = findViewById<RecyclerView>(R.id.rv_category)
+        val catListAdapter = CatListAdapter()
+        rvCat.adapter = catListAdapter
+        catListAdapter.submitList(categories)
     }
 }
 
