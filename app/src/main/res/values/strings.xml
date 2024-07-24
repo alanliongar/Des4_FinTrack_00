@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">FinTrack</string>
+    <string name="create">create</string>
+    <string name="create_track_title">Create a finance entry</string>
+    <string name="create_track_description">Please enter the finance entry name and value</string>
+    <string name="delete">delete</string>
+    <string name="delete_track_title">Delete a finance entry</string>
+    <string name="delete_track_description">You are going to delete this entry. Are you sure?</string>
+    <string name="update">update</string>
+    <string name="update_track_title">Update a finance entry</string>
+    <string name="update_track_description">You are going to update this entry. Please, be careful</string>
 </resources>
