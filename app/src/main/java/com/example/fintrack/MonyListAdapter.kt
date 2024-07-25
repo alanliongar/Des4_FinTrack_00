@@ -10,8 +10,16 @@ import androidx.recyclerview.widget.RecyclerView
 
 class MonyListAdapter() : ListAdapter<MonyData, MonyListAdapter.MonyViewHolder>(MonyListAdapter) {
 
-    private lateinit var onClick: (MonyData) -> Unit
-    private lateinit var onLongClick: (MonyData) -> Unit
+    private var onClick: (MonyData) -> Unit = {}
+    private var onLongClick: (MonyData) -> Unit = {}
+    fun setOnClickListener(onClick: (MonyData) -> Unit) {
+        this.onClick = onClick
+    }
+
+    fun setOnLongClickListener(onLongClick: (MonyData) -> Unit) {
+        this.onLongClick = onLongClick
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MonyViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_mony, parent, false)
         return MonyViewHolder(view)
@@ -29,7 +37,7 @@ class MonyListAdapter() : ListAdapter<MonyData, MonyListAdapter.MonyViewHolder>(
         fun bind(mony: MonyData, onClick: (MonyData) -> Unit, onLongClick: (MonyData) -> Unit) {
             tvValue.text = mony.value.toString()
             tvName.text = mony.name
-            view.setOnClickListener{
+            view.setOnClickListener {
                 onClick.invoke(mony)
             }
             view.setOnLongClickListener {

@@ -9,8 +9,18 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
 class CatListAdapter : ListAdapter<CatData, CatListAdapter.CatViewHolder>(CatListAdapter) {
-    private lateinit var onClick: (CatData) -> Unit
-    private lateinit var onLongClick: (CatData) -> Unit
+    private var onClick: (CatData) -> Unit = {}
+    private var onLongClick: (CatData) -> Unit = {}
+
+
+    fun setOnClickListener(onClick: (CatData) -> Unit) {
+        this.onClick = onClick
+    }
+
+    fun setOnLongClickListener(onLongClick: (CatData) -> Unit) {
+        this.onLongClick = onLongClick
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CatViewHolder {
         val vieww =
             LayoutInflater.from(parent.context).inflate(R.layout.item_category, parent, false)
