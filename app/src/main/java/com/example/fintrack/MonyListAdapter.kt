@@ -8,15 +8,15 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
-class MonyListAdapter() : ListAdapter<MonyData, MonyListAdapter.MonyViewHolder>(MonyListAdapter) {
+class MonyListAdapter() : ListAdapter<MonyUiData, MonyListAdapter.MonyViewHolder>(MonyListAdapter) {
 
-    private var onClick: (MonyData) -> Unit = {}
-    private var onLongClick: (MonyData) -> Unit = {}
-    fun setOnClickListener(onClick: (MonyData) -> Unit) {
+    private var onClick: (MonyUiData) -> Unit = {}
+    private var onLongClick: (MonyUiData) -> Unit = {}
+    fun setOnClickListener(onClick: (MonyUiData) -> Unit) {
         this.onClick = onClick
     }
 
-    fun setOnLongClickListener(onLongClick: (MonyData) -> Unit) {
+    fun setOnLongClickListener(onLongClick: (MonyUiData) -> Unit) {
         this.onLongClick = onLongClick
     }
 
@@ -34,7 +34,7 @@ class MonyListAdapter() : ListAdapter<MonyData, MonyListAdapter.MonyViewHolder>(
         private val tvValue = view.findViewById<TextView>(R.id.tv_value)
         private val tvName = view.findViewById<TextView>(R.id.tv_name)
         private val resColor = view.findViewById<View>(R.id.color_view)
-        fun bind(mony: MonyData, onClick: (MonyData) -> Unit, onLongClick: (MonyData) -> Unit) {
+        fun bind(mony: MonyUiData, onClick: (MonyUiData) -> Unit, onLongClick: (MonyUiData) -> Unit) {
             tvValue.text = mony.value.toString()
             tvName.text = mony.name
             view.setOnClickListener {
@@ -48,12 +48,12 @@ class MonyListAdapter() : ListAdapter<MonyData, MonyListAdapter.MonyViewHolder>(
         }
     }
 
-    companion object : DiffUtil.ItemCallback<MonyData>() {
-        override fun areItemsTheSame(oldItem: MonyData, newItem: MonyData): Boolean {
+    companion object : DiffUtil.ItemCallback<MonyUiData>() {
+        override fun areItemsTheSame(oldItem: MonyUiData, newItem: MonyUiData): Boolean {
             return oldItem == newItem
         }
 
-        override fun areContentsTheSame(oldItem: MonyData, newItem: MonyData): Boolean {
+        override fun areContentsTheSame(oldItem: MonyUiData, newItem: MonyUiData): Boolean {
             return oldItem.name == newItem.name && oldItem.category == newItem.category && oldItem.value == newItem.value
         }
 

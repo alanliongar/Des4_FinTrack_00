@@ -22,6 +22,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val (dados, categories) = createObjects(this)
+        /*
+        * Eu devo incluir aqui a parte do código que transforma as listas em objetos da entidade
+        */
+
+
+
+
+
+
+
+
         //nesse ponto no código, ambas as listas de objetos estão criadas.
         val rvMony: RecyclerView = findViewById<RecyclerView>(R.id.rv_dados)
         val monyListAdapter = MonyListAdapter()
@@ -52,19 +63,19 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-fun createObjects(context: Context): Pair<List<MonyData>, List<CatData>> {
+fun createObjects(context: Context): Pair<List<MonyUiData>, List<CatUiData>> {
     val dados = listOf(
-        MonyData("Wifi", "Internet", -130.00),
-        MonyData("Eletricity bill", "Utilities", -131.00),
-        MonyData("Gas Station", "Car", -132.00),
-        MonyData("Water bill", "Utilities", -133.00),
-        MonyData("Rent", "House", -134.00)
+        MonyUiData("Wifi", "Internet", -130.00),
+        MonyUiData("Eletricity bill", "Utilities", -131.00),
+        MonyUiData("Gas Station", "Car", -132.00),
+        MonyUiData("Water bill", "Utilities", -133.00),
+        MonyUiData("Rent", "House", -134.00)
     )
     val categories = listOf(
-        CatData("Internet", ContextCompat.getColor(context, R.color.violet), false),
-        CatData("Car", ContextCompat.getColor(context, R.color.red), false),
-        CatData("Utilities", ContextCompat.getColor(context, R.color.blue), false),
-        CatData("House", ContextCompat.getColor(context, R.color.green), false)
+        CatUiData("Internet", ContextCompat.getColor(context, R.color.violet), false),
+        CatUiData("Car", ContextCompat.getColor(context, R.color.red), false),
+        CatUiData("Utilities", ContextCompat.getColor(context, R.color.blue), false),
+        CatUiData("House", ContextCompat.getColor(context, R.color.green), false)
     )
     return Pair(dados.toList(), categories.toList())
 }

@@ -8,16 +8,16 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
-class CatListAdapter : ListAdapter<CatData, CatListAdapter.CatViewHolder>(CatListAdapter) {
-    private var onClick: (CatData) -> Unit = {}
-    private var onLongClick: (CatData) -> Unit = {}
+class CatListAdapter : ListAdapter<CatUiData, CatListAdapter.CatViewHolder>(CatListAdapter) {
+    private var onClick: (CatUiData) -> Unit = {}
+    private var onLongClick: (CatUiData) -> Unit = {}
 
 
-    fun setOnClickListener(onClick: (CatData) -> Unit) {
+    fun setOnClickListener(onClick: (CatUiData) -> Unit) {
         this.onClick = onClick
     }
 
-    fun setOnLongClickListener(onLongClick: (CatData) -> Unit) {
+    fun setOnLongClickListener(onLongClick: (CatUiData) -> Unit) {
         this.onLongClick = onLongClick
     }
 
@@ -36,7 +36,7 @@ class CatListAdapter : ListAdapter<CatData, CatListAdapter.CatViewHolder>(CatLis
         private val tvName = view.findViewById<TextView>(R.id.tv_catname)
         //private val catColor = view.findViewById<View>(R.id.)
 
-        fun bind(cat: CatData, onClick: (CatData) -> Unit, onLongClick: (CatData) -> Unit) {
+        fun bind(cat: CatUiData, onClick: (CatUiData) -> Unit, onLongClick: (CatUiData) -> Unit) {
             tvName.text = cat.name
             view.setOnLongClickListener {
                 onLongClick.invoke(cat)
@@ -48,12 +48,12 @@ class CatListAdapter : ListAdapter<CatData, CatListAdapter.CatViewHolder>(CatLis
         }
     }
 
-    companion object : DiffUtil.ItemCallback<CatData>() {
-        override fun areItemsTheSame(oldItem: CatData, newItem: CatData): Boolean {
+    companion object : DiffUtil.ItemCallback<CatUiData>() {
+        override fun areItemsTheSame(oldItem: CatUiData, newItem: CatUiData): Boolean {
             return oldItem == newItem
         }
 
-        override fun areContentsTheSame(oldItem: CatData, newItem: CatData): Boolean {
+        override fun areContentsTheSame(oldItem: CatUiData, newItem: CatUiData): Boolean {
             return oldItem.name == newItem.name
         }
 
