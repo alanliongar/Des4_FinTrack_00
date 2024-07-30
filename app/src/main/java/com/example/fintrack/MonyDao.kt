@@ -4,15 +4,15 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-//comit
+
 @Dao
-interface CatDao {
-    @Query("Select * From catentity")
-    fun getAll(): List<CatEntity>
+interface MonyDao {
+    @Query("Select * from monyentity")
+    fun getAll(): List<MonyEntity>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(catEntity: CatEntity)
+    fun insert(monyEntity: MonyEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertAll(catEntity: List<CatEntity>)
+    fun insertAll(monyEntity: List<MonyEntity>)
 }
