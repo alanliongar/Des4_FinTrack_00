@@ -7,7 +7,7 @@ import androidx.room.Query
 //comit
 @Dao
 interface CatDao {
-    @Query("Select * From catentity")
+    @Query("Select * From CatEntity")
     fun getAll(): List<CatEntity>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)

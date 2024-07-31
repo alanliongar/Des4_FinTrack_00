@@ -12,6 +12,7 @@ o app desde o começo.
 */
 //Sétimo dia: depois de procrastinar por 4 dias (vergonha hein?) eu consegui implementar apenas uma entidade e criar o banco de dados do aplicativo. Mas não o declarei nem inicializei na main activity ainda, pq tava revisando as aulas.
 //Oitavo dia: Eu terminei a construção bonitinha da parte lógica do banco, mas na hora de implementar na view (o de categoria), não deu pra visualizar. Mandei msg no devspace na dh: 30/07/2024 08:37.
+//Nono dia: fiquei 1h tentando entender por que a categoria buscada no banco de dados não tá sendo exibida no recyclerview.
 
 
 import android.content.Context
@@ -19,19 +20,20 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private val db by lazy {
-        //pra essa porra parar de reclamar, preciso ficar trocando a versão do banco de dados toda hora nessa caceta
+        //só não escrevo um palavrão auqi pq tem gente lendo meu código
         Room.databaseBuilder(applicationContext, FinTrackDataBase::class.java, "database-fintrack")
             .build()
     }
-
     private val catDao: CatDao by lazy {
         db.getCatDao()
     }
@@ -40,17 +42,13 @@ class MainActivity : AppCompatActivity() {
         db.getMonyDao()
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        val (dados, categories) = createObjects(this)
+        val (dados, categories) = createObjects(applicationContext)
         /*
         * Eu devo incluir aqui a parte do código que transforma as listas em objetos da entidade
         */
-
-
         //nesse ponto no código, ambas as listas de objetos estão criadas.
         val rvMony: RecyclerView = findViewById<RecyclerView>(R.id.rv_dados)
         val monyListAdapter = MonyListAdapter()
@@ -60,8 +58,10 @@ class MainActivity : AppCompatActivity() {
         val rvCat: RecyclerView = findViewById<RecyclerView>(R.id.rv_category)
         val catListAdapter = CatListAdapter()
         rvCat.adapter = catListAdapter
-        //insertDefaultCat(categories) //inserindo dados padrão
-        catListAdapter.submitList(getCategories())
+        insertDefaultCat(categories) //inserindo dados padrão
+        getCategoriesFromDB(this, catListAdapter)
+        //catListAdapter.submitList(categories)
+
         /*
                 catListAdapter.setOnClickListener { selected ->
 
@@ -90,15 +90,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getCategories(): List<CatUiData> {
-        var catUiDatas: List<CatUiData> = emptyList()
+    /*    suspend fun getCategories(): List<CatUiData> {
+            return withContext(Dispatchers.IO) {
+                val catFromDb: List<CatEntity> = catDao.getAll()
+                catFromDb.map {
+                    CatUiData(name = it.name, color = it.color, isSelected = it.isSelected)
+                }
+            }
+        }*/
+
+    private fun getCategoriesFromDB(context: Context, catListAdapter: CatListAdapter) {
         GlobalScope.launch(Dispatchers.IO) {
-            val catFromDb: List<CatEntity> = catDao.getAll()
-            catUiDatas = catFromDb.map {
-                CatUiData(name = it.name, color = it.color, isSelected = it.isSelected)
+            try {
+                val categoriesFromDb: List<CatEntity> = catDao.getAll()
+                println(categoriesFromDb.toString() + "Alannn")
+                val categoriesFromDbUiData: List<CatUiData> = categoriesFromDb.map {
+                    CatUiData(name = it.name, color = it.color, isSelected = it.isSelected)
+                }
+                catListAdapter.submitList(categoriesFromDbUiData)
+            } catch (e: Exception) {
+                println("Erro ao recuperar categorias: $e")
             }
         }
-        return catUiDatas
     }
 }
 
