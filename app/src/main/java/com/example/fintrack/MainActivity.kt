@@ -13,13 +13,11 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
     private val db by lazy {
         //só não escrevo um palavrão auqi pq tem gente lendo meu código
-        Room.databaseBuilder(applicationContext, FinTrackDataBase::class.java, "database-fintrack")
-            .build()
+        Room.databaseBuilder(applicationContext, FinTrackDataBase::class.java, "database-fintrack").build()
     }
     private val catDao: CatDao by lazy {
         db.getCatDao()
     }
-
     private val monyDao by lazy {
         db.getMonyDao()
     }
@@ -28,21 +26,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val (dados, categories) = createObjects(applicationContext)
-        /*
-        * Eu devo incluir aqui a parte do código que transforma as listas em objetos da entidade
-        */
-        //nesse ponto no código, ambas as listas de objetos estão criadas.
         val rvMony: RecyclerView = findViewById<RecyclerView>(R.id.rv_dados)
         val monyListAdapter = MonyListAdapter()
         rvMony.adapter = monyListAdapter
-        //rvMony.layoutManager = LinearLayoutManager(this)
-        monyListAdapter.submitList(dados)
         val rvCat: RecyclerView = findViewById<RecyclerView>(R.id.rv_category)
         val catListAdapter = CatListAdapter()
         rvCat.adapter = catListAdapter
         insertDefaultCat(categories) //inserindo dados padrão
+        insertDefaultMony(dados)
         getCategoriesFromDB(catListAdapter) //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
-
+        getMonyFromDB(monyListAdapter) //mesma coisa aqui
         /*
                 catListAdapter.setOnClickListener { selected ->
 
@@ -71,16 +64,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun insertDefaultMony(mony: List<MonyUiData>) {
+        val monyEntities: List<MonyEntity> = mony.map {
+            MonyEntity(id = 0, name = it.name, category = it.category, value = it.value)
+        }
+        GlobalScope.launch(Dispatchers.IO) {
+            monyDao.insertAll(monyEntities)
+        }
+    }
+
     private fun getCategoriesFromDB(catListAdapter: CatListAdapter) {
         GlobalScope.launch(Dispatchers.IO) {
-                val categoriesFromDb: List<CatEntity> = catDao.getAll()
-                println(categoriesFromDb.toString() + "Alannn")
-                val categoriesFromDbUiData: List<CatUiData> = categoriesFromDb.map {
-                    CatUiData(name = it.name, color = it.color, isSelected = it.isSelected)
-                }
-                GlobalScope.launch(Dispatchers.Main){
+            val categoriesFromDb: List<CatEntity> = catDao.getAll()
+            val categoriesFromDbUiData: List<CatUiData> = categoriesFromDb.map {
+                CatUiData(name = it.name, color = it.color, isSelected = it.isSelected)
+            }
+            GlobalScope.launch(Dispatchers.Main) {
                 catListAdapter.submitList(categoriesFromDbUiData)
-                }
+            }
+        }
+    }
+
+    private fun getMonyFromDB(monyListAdapter: MonyListAdapter) {
+        GlobalScope.launch(Dispatchers.IO) {
+            val monyFromDb: List<MonyEntity> = monyDao.getAll()
+            val monyFromDbUiData: List<MonyUiData> = monyFromDb.map {
+                MonyUiData(name = it.name, category = it.category, value = it.value)
+            }
+            GlobalScope.launch(Dispatchers.Main) {
+                monyListAdapter.submitList(monyFromDbUiData)
+            }
         }
     }
 }
@@ -102,7 +115,7 @@ fun createObjects(context: Context): Pair<List<MonyUiData>, List<CatUiData>> {
     return Pair(dados.toList(), categories.toList())
 }
 
-fun Anotacoes(){
+fun Anotacoes() {
 //primeiro dia: eu criei o item do rv de cada dado, parei na criação do item da rv da categoria (horizontal).
 //segundo dia: terminei a parte BEMM BASICA dos layouts, e travei na parte da construção do dado: recuperar a cor pro objeto
 //terceiro dia: terminei de tirar as dúvidas relacionadas a criação dos objetos quando precisa do contexto (pra cor), e criei o adapter da monylist.
@@ -118,4 +131,6 @@ o app desde o começo.
 //Oitavo dia: Eu terminei a construção bonitinha da parte lógica do banco, mas na hora de implementar na view (o de categoria), não deu pra visualizar. Mandei msg no devspace na dh: 30/07/2024 08:37.
 //Nono dia: fiquei 1h tentando entender por que a categoria buscada no banco de dados não tá sendo exibida no recyclerview.
 //Próximos passos: mandar a informação dos MONY para o rv; criar a dinamicidade de adições e exclusões de categorias, dados, e as telas de escolha de cores, adições e exclusões...
+//Décimo dia: eu descobri que ontem não fiz o commit e pull request direito no github e nao ficou verdinho lá.
+    //ainda no décimo dia: inserí os dados no banco de dados, e os proximos passos agora são "regras de negocio"....
 }
