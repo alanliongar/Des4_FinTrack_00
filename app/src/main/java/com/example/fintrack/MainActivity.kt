@@ -11,9 +11,12 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
+    private var catss = listOf<CatUiData>()
+    private var monyy = listOf<MonyUiData>()
     private val db by lazy {
         //só não escrevo um palavrão auqi pq tem gente lendo meu código
-        Room.databaseBuilder(applicationContext, FinTrackDataBase::class.java, "database-fintrack").build()
+        Room.databaseBuilder(applicationContext, FinTrackDataBase::class.java, "database-fintrack")
+            .build()
     }
     private val catDao: CatDao by lazy {
         db.getCatDao()
@@ -36,22 +39,39 @@ class MainActivity : AppCompatActivity() {
         insertDefaultMony(dados)
         getCategoriesFromDB(catListAdapter) //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
         getMonyFromDB(monyListAdapter) //mesma coisa aqui
+
+        catListAdapter.setOnClickListener { selected ->
+            val catTemp = catss.map { item ->
+                when {
+                    item.name == selected.name && !item.isSelected -> item.copy(isSelected = true)
+                    item.name == selected.name && item.isSelected -> item.copy(isSelected = false)
+                    else -> item
+                }
+            } //aqui cattemp é a lista atualizada
+
+            val taskTemp =
+                if (selected.name != "ALL" && selected.name != "+") {
+                    monyy.filter { it.category == selected.name }
+                } else {
+                    monyy
+                }
+            GlobalScope.launch(Dispatchers.Main) {
+                monyListAdapter.submitList(taskTemp)
+                catListAdapter.submitList(catTemp)
+            }
+        }
         /*
-                catListAdapter.setOnClickListener { selected ->
+        catListAdapter.setOnLongClickListener { selected ->
 
-                }
+        }
 
-                catListAdapter.setOnLongClickListener { selected ->
+        monyListAdapter.setOnClickListener { selected ->
 
-                }
+        }
 
-                monyListAdapter.setOnClickListener { selected ->
+        monyListAdapter.setOnLongClickListener { selected ->
 
-                }
-
-                monyListAdapter.setOnLongClickListener { selected ->
-
-                }
+        }
         */
     }
 
@@ -76,12 +96,16 @@ class MainActivity : AppCompatActivity() {
     private fun getCategoriesFromDB(catListAdapter: CatListAdapter) {
         GlobalScope.launch(Dispatchers.IO) {
             val categoriesFromDb: List<CatEntity> = catDao.getAll()
-            val categoriesFromDbUiData: List<CatUiData> = categoriesFromDb.map {
+            val categoriesFromDbUiData = categoriesFromDb.map {
                 CatUiData(name = it.name, color = it.color, isSelected = it.isSelected)
-            }
+            }.toMutableList()
+            categoriesFromDbUiData.add(CatUiData("+", 0, false))
+
+            catss = categoriesFromDbUiData
             GlobalScope.launch(Dispatchers.Main) {
                 catListAdapter.submitList(categoriesFromDbUiData)
             }
+
         }
     }
 
@@ -91,6 +115,7 @@ class MainActivity : AppCompatActivity() {
             val monyFromDbUiData: List<MonyUiData> = monyFromDb.map {
                 MonyUiData(name = it.name, category = it.category, value = it.value)
             }
+            monyy = monyFromDbUiData
             GlobalScope.launch(Dispatchers.Main) {
                 monyListAdapter.submitList(monyFromDbUiData)
             }
@@ -133,4 +158,5 @@ o app desde o começo.
 //Próximos passos: mandar a informação dos MONY para o rv; criar a dinamicidade de adições e exclusões de categorias, dados, e as telas de escolha de cores, adições e exclusões...
 //Décimo dia: eu descobri que ontem não fiz o commit e pull request direito no github e nao ficou verdinho lá.
     //ainda no décimo dia: inserí os dados no banco de dados, e os proximos passos agora são "regras de negocio"....
+//decimo primeiro dia: coloquei a categoria fake "+", coloquei a ação de clique sem eficiencia: criando uma caralhada de lista
 }

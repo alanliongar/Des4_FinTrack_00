@@ -2,9 +2,10 @@ package com.example.fintrack
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity()
 data class MonyEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
