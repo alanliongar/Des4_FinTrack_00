@@ -10,6 +10,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private var catss = listOf<CatUiData>()
@@ -36,40 +37,44 @@ class MainActivity : AppCompatActivity() {
         val rvCat: RecyclerView = findViewById<RecyclerView>(R.id.rv_category)
         val catListAdapter = CatListAdapter()
         rvCat.adapter = catListAdapter
-        insertDefaultCat(categories) //inserindo dados padrão
-        insertDefaultMony(dados)
-        getCategoriesFromDB(catListAdapter) //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
-        getMonyFromDB(monyListAdapter) //mesma coisa aqui
 
+        GlobalScope.launch(Dispatchers.Main) {
+            insertDefaultCat(categories) //inserindo dados padrão
+            insertDefaultMony(dados)
+            getCategoriesFromDB(catListAdapter) //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
+            getMonyFromDB(monyListAdapter) //mesma coisa aqui
+        }
         catListAdapter.setOnClickListener { selected ->
-            val catTemp = catss.map { item ->
-                when {
-                    item.name == selected.name && !item.isSelected && item.name != "+" -> item.copy(
-                        isSelected = true
-                    )
-
-                    item.name == selected.name && item.isSelected && item.name != "+" -> item.copy(
-                        isSelected = false
-                    )
-
-                    else -> item
-                }
-            } //aqui cattemp é a lista atualizada
-
-            val taskTemp =
-                if (selected.name != "ALL" && selected.name != "+") {
-                    monyy.filter { it.category == selected.name }
-                } else {
-                    monyy
-                }
             if (selected.name == "+") {
                 Snackbar.make(rvCat, "+ is selected", Snackbar.LENGTH_LONG).show()
-            }
+            } else {
+                val catTemp = catss.map { item ->
+                    when {
+                        item.name == selected.name && !item.isSelected -> item.copy(
+                            isSelected = true
+                        )
+
+                        item.name == selected.name && item.isSelected -> item.copy(
+                            isSelected = false
+                        )
+
+                        else -> item
+                    }
+                } //aqui cattemp é a lista atualizada
+
+                val taskTemp =
+                    if (selected.name != "ALL") {
+                        monyy.filter { it.category == selected.name }
+                    } else {
+                        monyy
+                    }
 
 
-            GlobalScope.launch(Dispatchers.Main) {
-                monyListAdapter.submitList(taskTemp)
-                catListAdapter.submitList(catTemp)
+
+                GlobalScope.launch(Dispatchers.Main) {
+                    monyListAdapter.submitList(taskTemp)
+                    catListAdapter.submitList(catTemp)
+                }
             }
         }
         /*
@@ -87,26 +92,26 @@ class MainActivity : AppCompatActivity() {
         */
     }
 
-    private fun insertDefaultCat(cats: List<CatUiData>) {
-        val catEntities = cats.map {
-            CatEntity(it.name, it.color, it.isSelected)
-        }
-        GlobalScope.launch(Dispatchers.IO) {
+    private suspend fun insertDefaultCat(cats: List<CatUiData>) {
+        withContext(Dispatchers.IO) {
+            val catEntities = cats.map {
+                CatEntity(it.name, it.color, it.isSelected)
+            }
             catDao.insertAll(catEntities)
         }
     }
 
-    private fun insertDefaultMony(mony: List<MonyUiData>) {
-        val monyEntities: List<MonyEntity> = mony.map {
-            MonyEntity(id = 0, name = it.name, category = it.category, value = it.value)
-        }
-        GlobalScope.launch(Dispatchers.IO) {
+    private suspend fun insertDefaultMony(mony: List<MonyUiData>) {
+        withContext(Dispatchers.IO) {
+            val monyEntities: List<MonyEntity> = mony.map {
+                MonyEntity(id = 0, name = it.name, category = it.category, value = it.value)
+            }
             monyDao.insertAll(monyEntities)
         }
     }
 
-    private fun getCategoriesFromDB(catListAdapter: CatListAdapter) {
-        GlobalScope.launch(Dispatchers.IO) {
+    private suspend fun getCategoriesFromDB(catListAdapter: CatListAdapter) {
+        withContext(Dispatchers.IO) {
             val categoriesFromDb: List<CatEntity> = catDao.getAll()
             val categoriesFromDbUiData = categoriesFromDb.map {
                 CatUiData(name = it.name, color = it.color, isSelected = it.isSelected)
@@ -114,21 +119,21 @@ class MainActivity : AppCompatActivity() {
             categoriesFromDbUiData.add(CatUiData("+", 0, false))
 
             catss = categoriesFromDbUiData
-            GlobalScope.launch(Dispatchers.Main) {
+            withContext(Dispatchers.Main) {
                 catListAdapter.submitList(categoriesFromDbUiData)
             }
 
         }
     }
 
-    private fun getMonyFromDB(monyListAdapter: MonyListAdapter) {
-        GlobalScope.launch(Dispatchers.IO) {
+    private suspend fun getMonyFromDB(monyListAdapter: MonyListAdapter) {
+        withContext(Dispatchers.IO) {
             val monyFromDb: List<MonyEntity> = monyDao.getAll()
             val monyFromDbUiData: List<MonyUiData> = monyFromDb.map {
                 MonyUiData(name = it.name, category = it.category, value = it.value)
             }
             monyy = monyFromDbUiData
-            GlobalScope.launch(Dispatchers.Main) {
+            withContext(Dispatchers.Main) {
                 monyListAdapter.submitList(monyFromDbUiData)
             }
         }
@@ -175,7 +180,10 @@ o app desde o começo.
     * Ainda no décimo primeiro dia, aula "plus click para adicionar categoria" - aos 8:35
     * aqui por algum motivo, quando as informações só aparecem quando eu compilo pela SEGUNDA VEZ, na primeira o app fica tôdo vazio
     * Tentar entender com os membros do devspace por que isso está acontecendo. Seria bom entender isso antes de ir pra parte de arquitetura/entendimento de threads
+    * --Eu mesmo tirei minha dúvida: utilizar suspend function aqui talvez seja o ideal.
+    * O que é uma suspend function? Uma função que quando é chamada, ela interrompe a coroutine (fluxo de execução principal) e roda "em segundo plano", e depois de sua execução, a coroutine volta a ser executada.
+    * Decisão: ainda falta entender no detalhe o que é uma suspend function, mas eu vi que na parte de arquitetura (bloco 27) eu vou ver isso no detalhe.
     * */
-
-
+//Dia 12: dei uma travada pra poder entender o que é suspend function e pra saber que vou ter aula disso mais pra frente em arquitetura
+    //continuar: Bloco 24, aula "Criando uma bottom sheet", do começo.
 }
