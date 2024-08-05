@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -43,8 +44,14 @@ class MainActivity : AppCompatActivity() {
         catListAdapter.setOnClickListener { selected ->
             val catTemp = catss.map { item ->
                 when {
-                    item.name == selected.name && !item.isSelected -> item.copy(isSelected = true)
-                    item.name == selected.name && item.isSelected -> item.copy(isSelected = false)
+                    item.name == selected.name && !item.isSelected && item.name != "+" -> item.copy(
+                        isSelected = true
+                    )
+
+                    item.name == selected.name && item.isSelected && item.name != "+" -> item.copy(
+                        isSelected = false
+                    )
+
                     else -> item
                 }
             } //aqui cattemp é a lista atualizada
@@ -55,6 +62,11 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     monyy
                 }
+            if (selected.name == "+") {
+                Snackbar.make(rvCat, "+ is selected", Snackbar.LENGTH_LONG).show()
+            }
+
+
             GlobalScope.launch(Dispatchers.Main) {
                 monyListAdapter.submitList(taskTemp)
                 catListAdapter.submitList(catTemp)
@@ -159,4 +171,11 @@ o app desde o começo.
 //Décimo dia: eu descobri que ontem não fiz o commit e pull request direito no github e nao ficou verdinho lá.
     //ainda no décimo dia: inserí os dados no banco de dados, e os proximos passos agora são "regras de negocio"....
 //decimo primeiro dia: coloquei a categoria fake "+", coloquei a ação de clique sem eficiencia: criando uma caralhada de lista
+    /*
+    * Ainda no décimo primeiro dia, aula "plus click para adicionar categoria" - aos 8:35
+    * aqui por algum motivo, quando as informações só aparecem quando eu compilo pela SEGUNDA VEZ, na primeira o app fica tôdo vazio
+    * Tentar entender com os membros do devspace por que isso está acontecendo. Seria bom entender isso antes de ir pra parte de arquitetura/entendimento de threads
+    * */
+
+
 }
