@@ -30,4 +30,6 @@ o app desde o começo.
 //Dia 12: dei uma travada pra poder entender o que é suspend function e pra saber que vou ter aula disso mais pra frente em arquitetura
     //continuar: Bloco 24, aula "Criando uma bottom sheet", do começo.
 //Dia 13: 06/08/2024 - terça-feira Eu criei apenas a bottom sheet category, e a recuperei. Trata-se de uma view que faz um "toastyyy", apenas isso.
+//Dia 14: 07/08/2024 - quarta-feira utilizei a bottom sheet (ação de clique passado pra classe que estende a padrão da bottom sheet) e nessa ação de clique, definimos que uma categoria é criada, inserida no banco de dados e recuperada pra UI.
+    //Ainda no dia 14: coloquei o float action button no layout principal, setei um id pra ele, e parei na aula "bottom sheet de tarefas", em 1 minuto.
 }

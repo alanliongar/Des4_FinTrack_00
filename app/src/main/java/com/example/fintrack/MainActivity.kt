@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 class MainActivity : AppCompatActivity() {
     private var catss = listOf<CatUiData>()
     private var monyy = listOf<MonyUiData>()
+    private val catListAdapter = CatListAdapter()
     private val db by lazy {
         //só não escrevo um palavrão auqi pq tem gente lendo meu código
         Room.databaseBuilder(applicationContext, FinTrackDataBase::class.java, "database-fintrack")
@@ -35,24 +36,29 @@ class MainActivity : AppCompatActivity() {
         val monyListAdapter = MonyListAdapter()
         rvMony.adapter = monyListAdapter
         val rvCat: RecyclerView = findViewById<RecyclerView>(R.id.rv_category)
-        val catListAdapter = CatListAdapter()
         rvCat.adapter = catListAdapter
 
         GlobalScope.launch(Dispatchers.Main) {
             insertDefaultCat(categories) //inserindo dados padrão
             insertDefaultMony(dados)
-            getCategoriesFromDB(catListAdapter) //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
+            getCategoriesFromDB() //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
             getMonyFromDB(monyListAdapter) //mesma coisa aqui
         }
         catListAdapter.setOnClickListener { selected ->
             if (selected.name == "+") {
-            val createCategoryBottomSheet = CreateCategoryBottomSheet()
-                createCategoryBottomSheet.show(supportFragmentManager,"createCategoryBottomSheet")
-
-
-
-
-            //Snackbar.make(rvCat, "+ is selected", Snackbar.LENGTH_LONG).show()
+                val createCategoryBottomSheet = CreateCategoryBottomSheet() { categoryName ->
+                    val catEntity = CatEntity(
+                        name = categoryName,
+                        color = 50, //ajustar a cor aqui
+                        isSelected = false
+                    )
+                    insertCat(catEntity)
+                    GlobalScope.launch(Dispatchers.Main) {
+                        getCategoriesFromDB()
+                    }
+                }
+                createCategoryBottomSheet.show(supportFragmentManager, "createCategoryBottomSheet")
+                //Snackbar.make(rvCat, "+ is selected", Snackbar.LENGTH_LONG).show()
             } else {
                 val catTemp = catss.map { item ->
                     when {
@@ -116,7 +122,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun getCategoriesFromDB(catListAdapter: CatListAdapter) {
+    private suspend fun getCategoriesFromDB() {
         withContext(Dispatchers.IO) {
             val categoriesFromDb: List<CatEntity> = catDao.getAll()
             val categoriesFromDbUiData = categoriesFromDb.map {
@@ -144,6 +150,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun insertCat(catEntity: CatEntity) {
+        GlobalScope.launch(Dispatchers.IO) {
+            catDao.insert(catEntity)
+        }
+    }
+
 }
 
 fun createObjects(context: Context): Pair<List<MonyUiData>, List<CatUiData>> {
