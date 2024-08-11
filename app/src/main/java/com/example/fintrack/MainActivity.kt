@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
-import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
     private var catss = listOf<CatUiData>()
     private var monyy = listOf<MonyUiData>()
     private val catListAdapter = CatListAdapter()
+    val monyListAdapter = MonyListAdapter()
     private val db by lazy {
         //só não escrevo um palavrão auqi pq tem gente lendo meu código
         Room.databaseBuilder(applicationContext, FinTrackDataBase::class.java, "database-fintrack")
@@ -33,17 +34,24 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val (dados, categories) = createObjects(applicationContext)
         val rvMony: RecyclerView = findViewById<RecyclerView>(R.id.rv_dados)
-        val monyListAdapter = MonyListAdapter()
         rvMony.adapter = monyListAdapter
         val rvCat: RecyclerView = findViewById<RecyclerView>(R.id.rv_category)
         rvCat.adapter = catListAdapter
+        val fabCreateMony: FloatingActionButton =
+            findViewById<FloatingActionButton>(R.id.fab_create_mony)
+
+        fabCreateMony.setOnClickListener {
+            showCreateUpdateMonyBottomSheet()
+        }
+
 
         GlobalScope.launch(Dispatchers.Main) {
             insertDefaultCat(categories) //inserindo dados padrão
             insertDefaultMony(dados)
             getCategoriesFromDB() //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
-            getMonyFromDB(monyListAdapter) //mesma coisa aqui
+            getMonyFromDB() //mesma coisa aqui
         }
+
         catListAdapter.setOnClickListener { selected ->
             if (selected.name == "+") {
                 val createCategoryBottomSheet = CreateCategoryBottomSheet() { categoryName ->
@@ -53,9 +61,6 @@ class MainActivity : AppCompatActivity() {
                         isSelected = false
                     )
                     insertCat(catEntity)
-                    GlobalScope.launch(Dispatchers.Main) {
-                        getCategoriesFromDB()
-                    }
                 }
                 createCategoryBottomSheet.show(supportFragmentManager, "createCategoryBottomSheet")
                 //Snackbar.make(rvCat, "+ is selected", Snackbar.LENGTH_LONG).show()
@@ -89,19 +94,15 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        /*
-        catListAdapter.setOnLongClickListener { selected ->
-
+        monyListAdapter.setOnClickListener { mony ->
+            showCreateUpdateMonyBottomSheet(mony)
         }
+        /*        catListAdapter.setOnLongClickListener { selected ->
 
-        monyListAdapter.setOnClickListener { selected ->
+                }
+                monyListAdapter.setOnLongClickListener { selected ->
 
-        }
-
-        monyListAdapter.setOnLongClickListener { selected ->
-
-        }
-        */
+                }*/
     }
 
     private suspend fun insertDefaultCat(cats: List<CatUiData>) {
@@ -116,7 +117,7 @@ class MainActivity : AppCompatActivity() {
     private suspend fun insertDefaultMony(mony: List<MonyUiData>) {
         withContext(Dispatchers.IO) {
             val monyEntities: List<MonyEntity> = mony.map {
-                MonyEntity(id = 0, name = it.name, category = it.category, value = it.value)
+                MonyEntity(it.id, name = it.name, category = it.category, value = it.value)
             }
             monyDao.insertAll(monyEntities)
         }
@@ -138,11 +139,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun getMonyFromDB(monyListAdapter: MonyListAdapter) {
+    private suspend fun getMonyFromDB() {
         withContext(Dispatchers.IO) {
             val monyFromDb: List<MonyEntity> = monyDao.getAll()
             val monyFromDbUiData: List<MonyUiData> = monyFromDb.map {
-                MonyUiData(name = it.name, category = it.category, value = it.value)
+                MonyUiData(it.id, name = it.name, category = it.category, value = it.value)
             }
             monyy = monyFromDbUiData
             withContext(Dispatchers.Main) {
@@ -154,18 +155,42 @@ class MainActivity : AppCompatActivity() {
     private fun insertCat(catEntity: CatEntity) {
         GlobalScope.launch(Dispatchers.IO) {
             catDao.insert(catEntity)
+            getCategoriesFromDB()
         }
     }
+
+    private fun insertMony(monyEntity: MonyEntity) {
+        GlobalScope.launch(Dispatchers.IO) {
+            monyDao.insert(monyEntity)
+            getMonyFromDB()
+        }
+    }
+
+    private fun showCreateUpdateMonyBottomSheet(monyUiData: MonyUiData? = null) {
+
+        val createOrUpdateMonyBottomSheet =
+            CreateOrUpdateMonyBottomSheet(catss, monyUiData) { monyToBeCreated ->
+                val monyEntityToBeInsert = MonyEntity(
+                    id = 0,
+                    name = monyToBeCreated.name,
+                    category = monyToBeCreated.category,
+                    value = 2.0
+                )
+                insertMony(monyEntityToBeInsert)
+            }
+        createOrUpdateMonyBottomSheet.show(supportFragmentManager, "createMonyBottomSheet")
+    }
+
 
 }
 
 fun createObjects(context: Context): Pair<List<MonyUiData>, List<CatUiData>> {
     val dados = listOf(
-        MonyUiData("Wifi", "Internet", -130.00),
-        MonyUiData("Eletricity bill", "Utilities", -131.00),
-        MonyUiData("Gas Station", "Car", -132.00),
-        MonyUiData("Water bill", "Utilities", -133.00),
-        MonyUiData("Rent", "House", -134.00)
+        MonyUiData(0, "Wifi", "Internet", -130.00),
+        MonyUiData(0, "Eletricity bill", "Utilities", -131.00),
+        MonyUiData(0, "Gas Station", "Car", -132.00),
+        MonyUiData(0, "Water bill", "Utilities", -133.00),
+        MonyUiData(0, "Rent", "House", -134.00)
     )
     val categories = listOf(
         CatUiData("Internet", ContextCompat.getColor(context, R.color.violet), false),

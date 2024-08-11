@@ -53,7 +53,7 @@
         tools:listitem="@layout/item_mony" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_create_task"
+        android:id="@+id/fab_create_mony"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"

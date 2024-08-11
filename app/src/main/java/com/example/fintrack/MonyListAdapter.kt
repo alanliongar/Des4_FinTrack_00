@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
 class MonyListAdapter() : ListAdapter<MonyUiData, MonyListAdapter.MonyViewHolder>(MonyListAdapter) {
-
     private var onClick: (MonyUiData) -> Unit = {}
     private var onLongClick: (MonyUiData) -> Unit = {}
     fun setOnClickListener(onClick: (MonyUiData) -> Unit) {
@@ -37,10 +36,10 @@ class MonyListAdapter() : ListAdapter<MonyUiData, MonyListAdapter.MonyViewHolder
         fun bind(mony: MonyUiData, onClick: (MonyUiData) -> Unit, onLongClick: (MonyUiData) -> Unit) {
             tvValue.text = mony.value.toString()
             tvName.text = mony.name
-            view.setOnClickListener {
+            view.rootView.setOnClickListener {
                 onClick.invoke(mony)
             }
-            view.setOnLongClickListener {
+            view.rootView.setOnLongClickListener {
                 onLongClick.invoke(mony)
                 true
             }

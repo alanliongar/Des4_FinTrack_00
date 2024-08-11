@@ -15,8 +15,8 @@ class CreateCategoryBottomSheet(private val onCreateClicked: (String) -> Unit) :
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.create_category_bottom_sheet, container, false)
-        val btnCreate = view.findViewById<Button>(R.id.btn_create)
+        val view = inflater.inflate(R.layout.create_cat_bottom_sheet, container, false)
+        val btnCreate = view.findViewById<Button>(R.id.btn_cat_create)
         val tieCatName = view.findViewById<TextInputEditText>(R.id.tie_cat_name)
         btnCreate.setOnClickListener {
             val name = tieCatName.text.toString()

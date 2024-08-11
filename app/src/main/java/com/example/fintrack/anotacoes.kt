@@ -32,4 +32,7 @@ o app desde o começo.
 //Dia 13: 06/08/2024 - terça-feira Eu criei apenas a bottom sheet category, e a recuperei. Trata-se de uma view que faz um "toastyyy", apenas isso.
 //Dia 14: 07/08/2024 - quarta-feira utilizei a bottom sheet (ação de clique passado pra classe que estende a padrão da bottom sheet) e nessa ação de clique, definimos que uma categoria é criada, inserida no banco de dados e recuperada pra UI.
     //Ainda no dia 14: coloquei o float action button no layout principal, setei um id pra ele, e parei na aula "bottom sheet de tarefas", em 1 minuto.
+//Dia 15: Estudei 3h - 11/08/2024 09:50:00 - Eu inserí a ação do FAB, coloquei função pra inserir a tarefa do usuário no banco de dados, defini o código do clique na lista de tarefas, modifiquei o código de create(orupdate)taskbottomsheet, e coloquei
+    //pra quando atualizar (clicar na lista), mostrar pro usuário tanto o texto quanto a categoria no spinner e os componentes de ui (escrito update)....
+
 }
