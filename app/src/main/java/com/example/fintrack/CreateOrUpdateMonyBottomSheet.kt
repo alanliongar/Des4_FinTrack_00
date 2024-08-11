@@ -17,7 +17,8 @@ import org.w3c.dom.Text
 class CreateOrUpdateMonyBottomSheet(
     private val catList: List<CatUiData>,
     private val mony: MonyUiData? = null,
-    private val onCreateClicked: (MonyUiData) -> Unit
+    private val onCreateClicked: (MonyUiData) -> Unit,
+    private val onUpdateClicked: (MonyUiData) -> Unit
 ) :
     BottomSheetDialogFragment() {
     override fun onCreateView(
@@ -76,21 +77,30 @@ class CreateOrUpdateMonyBottomSheet(
 
         btnMCreate.setOnClickListener {
             if (monyCat != null) {
-                onCreateClicked.invoke(
-                    MonyUiData(
-                        id = 0,
-                        name = tieMonyName.text.toString(),
-                        category = requireNotNull(monyCat),
-                        250.0 //preciso criar a regra completa pra pegar o valor tbm
+                if (mony == null) {
+                    onCreateClicked.invoke(
+                        MonyUiData(
+                            id = 0,
+                            name = tieMonyName.text.toString(),
+                            category = requireNotNull(monyCat),
+                            250.0 //preciso criar a regra completa pra pegar o valor tbm
+                        )
                     )
-                )
+                } else {
+                    onUpdateClicked.invoke(
+                        MonyUiData(
+                            id = mony.id,
+                            name = tieMonyName.text.toString(),
+                            category = requireNotNull(monyCat),
+                            value = 250.0
+                        )
+                    )
+                }
                 dismiss()
             } else {
                 Snackbar.make(btnMCreate, "Please select a category", Snackbar.LENGTH_LONG).show()
             }
         }
-
-
         return view
     }
 }

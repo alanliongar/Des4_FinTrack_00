@@ -85,9 +85,6 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         monyy
                     }
-
-
-
                 GlobalScope.launch(Dispatchers.Main) {
                     monyListAdapter.submitList(taskTemp)
                     catListAdapter.submitList(catTemp)
@@ -159,9 +156,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun insertMony(monyEntity: MonyEntity) {
+    private fun insertOrUpdate(monyEntity: MonyEntity) {
         GlobalScope.launch(Dispatchers.IO) {
-            monyDao.insert(monyEntity)
+            monyDao.insertOrUpdate(monyEntity)
             getMonyFromDB()
         }
     }
@@ -169,15 +166,24 @@ class MainActivity : AppCompatActivity() {
     private fun showCreateUpdateMonyBottomSheet(monyUiData: MonyUiData? = null) {
 
         val createOrUpdateMonyBottomSheet =
-            CreateOrUpdateMonyBottomSheet(catss, monyUiData) { monyToBeCreated ->
+            CreateOrUpdateMonyBottomSheet(catss, monyUiData, onCreateClicked = { monyToBeCreated ->
                 val monyEntityToBeInsert = MonyEntity(
                     id = 0,
                     name = monyToBeCreated.name,
                     category = monyToBeCreated.category,
                     value = 2.0
                 )
-                insertMony(monyEntityToBeInsert)
-            }
+                insertOrUpdate(monyEntityToBeInsert)
+            }, onUpdateClicked = { monyToBeUpdated -> //essa porra aqui é uma uidata
+                val monyyToBeUpdated = MonyEntity(
+                    id = monyToBeUpdated.id,
+                    name = monyToBeUpdated.name,
+                    category = monyToBeUpdated.category,
+                    value = monyToBeUpdated.value
+                )
+                println(monyyToBeUpdated.toString() + "Alannnnn")
+                insertOrUpdate(monyyToBeUpdated)
+            })
         createOrUpdateMonyBottomSheet.show(supportFragmentManager, "createMonyBottomSheet")
     }
 

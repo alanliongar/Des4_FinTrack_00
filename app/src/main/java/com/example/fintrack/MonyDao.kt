@@ -10,9 +10,9 @@ interface MonyDao {
     @Query("Select * from monyentity")
     fun getAll(): List<MonyEntity>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(monyEntity: MonyEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertOrUpdate(monyEntity: MonyEntity)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(monyEntity: List<MonyEntity>)
 }
