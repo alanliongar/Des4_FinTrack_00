@@ -1,3 +1,5 @@
+**Aplicativo ainda em desenvolvimento. O conteúdo abaixo veio junto com o template inicial.
+
 <div align="center">
    
    ![Variation=Logotype 02](https://github.com/colussicode/FinTrack/assets/54089435/c5b55d7c-2b31-450e-8dc5-86473e9566d1)
