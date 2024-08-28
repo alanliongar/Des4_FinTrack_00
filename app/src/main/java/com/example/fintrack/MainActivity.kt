@@ -1,5 +1,5 @@
 package com.example.fintrack
-//anotações no final do arquivo mainactivity.kt
+//anotações coloquei num arquivo próprio
 import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +18,6 @@ class MainActivity : AppCompatActivity() {
     private val catListAdapter = CatListAdapter()
     val monyListAdapter = MonyListAdapter()
     private val db by lazy {
-        //só não escrevo um palavrão auqi pq tem gente lendo meu código
         Room.databaseBuilder(applicationContext, FinTrackDataBase::class.java, "database-fintrack")
             .build()
     }
@@ -156,15 +155,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun insertOrUpdate(monyEntity: MonyEntity) {
+    private fun insertMony(monyEntity: MonyEntity) {
         GlobalScope.launch(Dispatchers.IO) {
-            monyDao.insertOrUpdate(monyEntity)
+            monyDao.insert(monyEntity)
             getMonyFromDB()
         }
     }
 
-    private fun showCreateUpdateMonyBottomSheet(monyUiData: MonyUiData? = null) {
+    private fun updateMony(monyEntity: MonyEntity) {
+        GlobalScope.launch(Dispatchers.IO) {
+            monyDao.update(monyEntity)
+            getMonyFromDB()
+        }
+    }
 
+    private fun deleteMony(monyEntity: MonyEntity) {
+        GlobalScope.launch(Dispatchers.IO) {
+            monyDao.delete(monyEntity)
+            getMonyFromDB()
+        }
+
+    }
+
+
+    private fun showCreateUpdateMonyBottomSheet(monyUiData: MonyUiData? = null) {
         val createOrUpdateMonyBottomSheet =
             CreateOrUpdateMonyBottomSheet(catss, monyUiData, onCreateClicked = { monyToBeCreated ->
                 val monyEntityToBeInsert = MonyEntity(
@@ -173,30 +187,35 @@ class MainActivity : AppCompatActivity() {
                     category = monyToBeCreated.category,
                     value = 2.0
                 )
-                insertOrUpdate(monyEntityToBeInsert)
-            }, onUpdateClicked = { monyToBeUpdated -> //essa porra aqui é uma uidata
+                insertMony(monyEntityToBeInsert)
+            }, onUpdateClicked = { monyToBeUpdated ->
                 val monyyToBeUpdated = MonyEntity(
                     id = monyToBeUpdated.id,
                     name = monyToBeUpdated.name,
                     category = monyToBeUpdated.category,
                     value = monyToBeUpdated.value
                 )
-                println(monyyToBeUpdated.toString() + "Alannnnn")
-                insertOrUpdate(monyyToBeUpdated)
+                updateMony(monyyToBeUpdated)
+            }, onDeleteClicked = { monyToBeDeleted ->
+                val monyyToBeDeleted: MonyEntity = MonyEntity(
+                    id = monyToBeDeleted.id,
+                    name = monyToBeDeleted.name,
+                    category = monyToBeDeleted.category,
+                    value = monyToBeDeleted.value
+                )
+                deleteMony(monyyToBeDeleted)
             })
         createOrUpdateMonyBottomSheet.show(supportFragmentManager, "createMonyBottomSheet")
     }
-
-
 }
 
 fun createObjects(context: Context): Pair<List<MonyUiData>, List<CatUiData>> {
     val dados = listOf(
-        MonyUiData(0, "Wifi", "Internet", -130.00),
-        MonyUiData(0, "Eletricity bill", "Utilities", -131.00),
-        MonyUiData(0, "Gas Station", "Car", -132.00),
-        MonyUiData(0, "Water bill", "Utilities", -133.00),
-        MonyUiData(0, "Rent", "House", -134.00)
+        MonyUiData(1, "Wifi", "Internet", -130.00),
+        MonyUiData(2, "Eletricity bill", "Utilities", -131.00),
+        MonyUiData(3, "Gas Station", "Car", -132.00),
+        MonyUiData(4, "Water bill", "Utilities", -133.00),
+        MonyUiData(5, "Rent", "House", -134.00)
     )
     val categories = listOf(
         CatUiData("Internet", ContextCompat.getColor(context, R.color.violet), false),

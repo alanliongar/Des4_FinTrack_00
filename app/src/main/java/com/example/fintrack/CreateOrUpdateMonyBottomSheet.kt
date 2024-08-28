@@ -1,6 +1,7 @@
 package com.example.fintrack
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,27 +10,26 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
-import org.w3c.dom.Text
 
 class CreateOrUpdateMonyBottomSheet(
     private val catList: List<CatUiData>,
     private val mony: MonyUiData? = null,
     private val onCreateClicked: (MonyUiData) -> Unit,
-    private val onUpdateClicked: (MonyUiData) -> Unit
-) :
-    BottomSheetDialogFragment() {
+    private val onUpdateClicked: (MonyUiData) -> Unit,
+    private val onDeleteClicked: (MonyUiData) -> Unit
+) : BottomSheetDialogFragment() {
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.create_or_update_mony_bottom_sheet, container, false)
 
         val bsTvTitle: TextView = view.findViewById<TextView>(R.id.tv_title_mony_bs)
-        val btnMCreate = view.findViewById<Button>(R.id.btn_mony_create)
+        val btnMCreateOrUpdate = view.findViewById<Button>(R.id.btn_mony_create_or_update)
+        val btnMDelete = view.findViewById<Button>(R.id.btn_mony_delete)
         val tieMonyName = view.findViewById<TextInputEditText>(R.id.tie_mony_name)
         val spinner: Spinner = view.findViewById<Spinner>(R.id.cat_list)
 
@@ -39,9 +39,7 @@ class CreateOrUpdateMonyBottomSheet(
         }
 
         ArrayAdapter(
-            requireActivity().baseContext,
-            android.R.layout.simple_spinner_item,
-            catStrs
+            requireActivity().baseContext, android.R.layout.simple_spinner_item, catStrs
         ).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_item)
             spinner.adapter = adapter
@@ -49,10 +47,7 @@ class CreateOrUpdateMonyBottomSheet(
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
+                parent: AdapterView<*>?, view: View?, position: Int, id: Long
             ) {
                 monyCat = catStrs[position]
             }
@@ -63,25 +58,34 @@ class CreateOrUpdateMonyBottomSheet(
         }
 
         if (mony == null) {
+            btnMDelete.isVisible = false
             bsTvTitle.setText(R.string.create_track_title)
-            btnMCreate.setText(R.string.create)
+            btnMCreateOrUpdate.setText(R.string.create)
         } else {
+            btnMDelete.isVisible = true
             bsTvTitle.setText(R.string.update_track_title)
-            btnMCreate.setText(R.string.update)
+            btnMCreateOrUpdate.setText(R.string.update)
             tieMonyName.setText(mony.name)
             val currentCat: CatUiData = catList.first { it.name == mony.category }
             val index = catList.indexOf(currentCat)
             spinner.setSelection(index)
         }
 
-
-        btnMCreate.setOnClickListener {
-            if (monyCat != null) {
+        btnMDelete.setOnClickListener {
+            if (mony == null) {
+                Log.d("CreateOrUpdateMonyBottomSheet", "Task not found")
+            } else {
+                onDeleteClicked.invoke(mony)
+                dismiss()
+            }
+        }
+        btnMCreateOrUpdate.setOnClickListener {
+            if (monyCat != null && tieMonyName.text.toString().trim().isNotEmpty()) {
                 if (mony == null) {
                     onCreateClicked.invoke(
                         MonyUiData(
                             id = 0,
-                            name = tieMonyName.text.toString(),
+                            name = tieMonyName.text.toString().trim(),
                             category = requireNotNull(monyCat),
                             250.0 //preciso criar a regra completa pra pegar o valor tbm
                         )
@@ -90,15 +94,33 @@ class CreateOrUpdateMonyBottomSheet(
                     onUpdateClicked.invoke(
                         MonyUiData(
                             id = mony.id,
-                            name = tieMonyName.text.toString(),
+                            name = tieMonyName.text.toString().trim(),
                             category = requireNotNull(monyCat),
-                            value = 250.0
+                            value = mony.value //aqui deve fazer o update do valor também, quando for corrigir
                         )
                     )
                 }
                 dismiss()
             } else {
-                Snackbar.make(btnMCreate, "Please select a category", Snackbar.LENGTH_LONG).show()
+                if (monyCat == null && tieMonyName.text.toString().trim().isEmpty()) {
+                    Snackbar.make(
+                        btnMCreateOrUpdate,
+                        "Please select a category and create an entry name",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                } else if (monyCat == null && tieMonyName.text.toString().trim().isNotEmpty()) {
+                    Snackbar.make(
+                        btnMCreateOrUpdate,
+                        "Please select a category",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                } else if (monyCat != null && tieMonyName.text.toString().trim().isEmpty()) {
+                    Snackbar.make(
+                        btnMCreateOrUpdate,
+                        "Create an entry name",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
             }
         }
         return view
