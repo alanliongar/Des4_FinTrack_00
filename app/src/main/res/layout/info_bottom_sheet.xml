@@ -15,7 +15,7 @@
         android:layout_marginEnd="8dp"
         android:textSize="24sp"
         android:textStyle="bold"
-        tools:text="@string/delete_track_title" />
+        tools:text="@string/delete_cat_title" />
 
     <TextView
         android:id="@+id/tv_info_desc"
@@ -26,15 +26,12 @@
         android:layout_marginEnd="8dp"
         android:textSize="18sp"
         android:textStyle=""
-        tools:text="@string/delete_track_description" />
+        tools:text="@string/delete_cat_description" />
 
     <Button
-        android:layout_margin="16dp"
+        android:id="@+id/btn_info_del"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:text="@string/create"
-
-        />
-
-
+        android:layout_margin="16dp"
+        tools:text="@string/delete" />
 </LinearLayout>

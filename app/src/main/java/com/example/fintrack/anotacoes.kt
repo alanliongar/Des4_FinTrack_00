@@ -36,10 +36,17 @@ o app desde o começo.
     Dia 15: Estudei 3h - 11/08/2024 09:50:00 - Eu inserí a ação do FAB, coloquei função pra inserir a tarefa do usuário no banco de dados, defini o código do clique na lista de tarefas, modifiquei o código de create(orupdate)taskbottomsheet, e coloquei
         pra quando atualizar (clicar na lista), mostrar pro usuário tanto o texto quanto a categoria no spinner e os componentes de ui (escrito update)....
         -Ainda no dia 15: adicionei mais uma hora de estudos (às 13:40), e nela, incluí o código pra atualizar a tarefa decentemente. Parei nos 7:11 da aula "Atualizando tarefa na base de dados"
-    */
 
-    /*Dia 16 - Estudei 2h: 10:45 as 12:45 e até agora eu passei quase 1h entendendo que o createbottomsheet é uma classe, e essa classe tem apenas as declarações
+    Dia 16 -28/08/2024 - Estudei 2h: 10:45 as 12:45 e até agora eu passei quase 1h entendendo que o createbottomsheet é uma classe, e essa classe tem apenas as declarações
     dos botões, tanto de update, create e delete, e os códigos das ações desses botões ficam na mainctivity.
     Também coloquei o código pra deletar "tarefas", assim como atualizar (separado de criar), etc...
      */
+
+    /*
+    * Dia 17 - 29/08/2024 - 2h30m de estudos: BS de info, Relação entre tabelas com foreignkey, listando todas e filtrando por categorias - direto da base de dados (com queries)
+    * Regra pra selecionar categorias (com queries), selecionando tudo (all) com query, e seleção de spinner sem "+" e sem "ALL"
+    *
+    * Próximos passos: remover o pré-selecionado do spinner e colocar alguma frase pro usuário, e fazer o estado de vazio do app pro usuário começar a mexer nele.
+    * */
+
 }

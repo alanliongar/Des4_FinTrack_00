@@ -14,6 +14,7 @@ import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     private var catss = listOf<CatUiData>()
+    private var catsEnt = listOf<CatEntity>()
     private var monyy = listOf<MonyUiData>()
     private val catListAdapter = CatListAdapter()
     val monyListAdapter = MonyListAdapter()
@@ -47,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.Main) {
             insertDefaultCat(categories) //inserindo dados padrão
             insertDefaultMony(dados)
-            getCategoriesFromDB() //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
+            getCatFromDB() //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
             getMonyFromDB() //mesma coisa aqui
         }
 
@@ -55,8 +56,7 @@ class MainActivity : AppCompatActivity() {
             if (selected.name == "+") {
                 val createCategoryBottomSheet = CreateCategoryBottomSheet() { categoryName ->
                     val catEntity = CatEntity(
-                        name = categoryName,
-                        color = 50, //ajustar a cor aqui
+                        name = categoryName, color = 50, //ajustar a cor aqui
                         isSelected = false
                     )
                     insertCat(catEntity)
@@ -66,26 +66,23 @@ class MainActivity : AppCompatActivity() {
             } else {
                 val catTemp = catss.map { item ->
                     when {
+                        item.name == selected.name && item.isSelected -> item.copy(
+                            isSelected = true
+                        )
+
                         item.name == selected.name && !item.isSelected -> item.copy(
                             isSelected = true
                         )
 
-                        item.name == selected.name && item.isSelected -> item.copy(
+                        item.name != selected.name && item.isSelected -> item.copy(
                             isSelected = false
                         )
 
                         else -> item
                     }
                 } //aqui cattemp é a lista atualizada
-
-                val taskTemp =
-                    if (selected.name != "ALL") {
-                        monyy.filter { it.category == selected.name }
-                    } else {
-                        monyy
-                    }
                 GlobalScope.launch(Dispatchers.Main) {
-                    monyListAdapter.submitList(taskTemp)
+                    filterMonyByCatName(selected.name)
                     catListAdapter.submitList(catTemp)
                 }
             }
@@ -93,12 +90,23 @@ class MainActivity : AppCompatActivity() {
         monyListAdapter.setOnClickListener { mony ->
             showCreateUpdateMonyBottomSheet(mony)
         }
-        /*        catListAdapter.setOnLongClickListener { selected ->
+        catListAdapter.setOnLongClickListener { catToBeDeleted -> //aqui é um catUiData
 
+            if (catToBeDeleted.name != "+" && catToBeDeleted.name != "ALL") {
+                val title = this.getString(R.string.delete_cat_title)
+                val desc = this.getString(R.string.delete_cat_description)
+                val btnText = this.getString(R.string.delete)
+
+                showInfoDialog(title, desc, btnText) {
+                    val catEntityToBeDeleted = CatEntity(
+                        catToBeDeleted.name, catToBeDeleted.color, catToBeDeleted.isSelected
+                    )
+                    deleteCat(catEntityToBeDeleted)
                 }
-                monyListAdapter.setOnLongClickListener { selected ->
-
-                }*/
+            }
+        }/*
+        monyListAdapter.setOnLongClickListener { selected ->
+        }*/
     }
 
     private suspend fun insertDefaultCat(cats: List<CatUiData>) {
@@ -119,19 +127,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun getCategoriesFromDB() {
+    private fun showInfoDialog(title: String, desc: String, btnText: String, onClick: () -> Unit) {
+        val infoBottomSheet = InfoBottomSheet(title, desc, btnText, onClick)
+        infoBottomSheet.show(supportFragmentManager, "infoBottomSheet")
+    }
+
+    private suspend fun getCatFromDB() {
         withContext(Dispatchers.IO) {
             val categoriesFromDb: List<CatEntity> = catDao.getAll()
+            catsEnt = categoriesFromDb
             val categoriesFromDbUiData = categoriesFromDb.map {
                 CatUiData(name = it.name, color = it.color, isSelected = it.isSelected)
             }.toMutableList()
             categoriesFromDbUiData.add(CatUiData("+", 0, false))
 
-            catss = categoriesFromDbUiData
-            withContext(Dispatchers.Main) {
-                catListAdapter.submitList(categoriesFromDbUiData)
-            }
+            val tempCatList = mutableListOf(CatUiData("ALL", 0, false))
+            tempCatList.addAll(categoriesFromDbUiData)
 
+            catss = tempCatList
+            withContext(Dispatchers.Main) {
+                catListAdapter.submitList(catss)
+            }
         }
     }
 
@@ -143,15 +159,33 @@ class MainActivity : AppCompatActivity() {
             }
             monyy = monyFromDbUiData
             withContext(Dispatchers.Main) {
-                monyListAdapter.submitList(monyFromDbUiData)
+                monyListAdapter.submitList(monyy)
             }
         }
     }
 
+    private suspend fun filterMonyByCatName(category: String) {
+        var taskTemp: List<MonyUiData> = emptyList()
+        withContext(Dispatchers.IO) {
+            taskTemp = if (category != "ALL") {
+                monyDao.getAllbyCatName(category)
+                    .map { MonyUiData(it.id, it.name, it.category, it.value) }
+                //monyy.filter { it.category == selected.name }
+            } else {
+                monyDao.getAll().map { MonyUiData(it.id, it.name, it.category, it.value) }
+                //monyy
+            }
+        }
+        withContext(Dispatchers.Main) {
+            monyListAdapter.submitList(taskTemp)
+        }
+    }
+
+
     private fun insertCat(catEntity: CatEntity) {
         GlobalScope.launch(Dispatchers.IO) {
             catDao.insert(catEntity)
-            getCategoriesFromDB()
+            getCatFromDB()
         }
     }
 
@@ -177,10 +211,21 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun deleteCat(catEntity: CatEntity) {
+        GlobalScope.launch(Dispatchers.IO) {
+            monyDao.deleteAll(monyDao.getAllbyCatName(catEntity.name))
+            catDao.delete(catEntity)
+            GlobalScope.launch(Dispatchers.Main) {
+                getCatFromDB()
+                getMonyFromDB()
+            }
+        }
+    }
+
 
     private fun showCreateUpdateMonyBottomSheet(monyUiData: MonyUiData? = null) {
         val createOrUpdateMonyBottomSheet =
-            CreateOrUpdateMonyBottomSheet(catss, monyUiData, onCreateClicked = { monyToBeCreated ->
+            CreateOrUpdateMonyBottomSheet(catsEnt, monyUiData, onCreateClicked = { monyToBeCreated ->
                 val monyEntityToBeInsert = MonyEntity(
                     id = 0,
                     name = monyToBeCreated.name,

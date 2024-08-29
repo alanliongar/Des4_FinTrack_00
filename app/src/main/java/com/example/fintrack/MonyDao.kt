@@ -23,4 +23,10 @@ interface MonyDao {
 
     @Delete
     fun delete(monyEntity: MonyEntity)
+
+    @Query("Select * from monyentity where cat is :categoryName")
+    fun getAllbyCatName(categoryName: String): List<MonyEntity>
+
+    @Delete
+    fun deleteAll(monyEntity: List<MonyEntity>)
 }

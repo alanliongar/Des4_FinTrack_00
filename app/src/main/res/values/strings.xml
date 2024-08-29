@@ -6,6 +6,8 @@
     <string name="delete">delete</string>
     <string name="delete_track_title">Delete a finance entry</string>
     <string name="delete_track_description">You are going to delete this entry. Are you sure?</string>
+    <string name="delete_cat_title">Delete a category</string>
+    <string name="delete_cat_description">You are going to delete this category and all finance entries related to it. Are you sure?</string>
     <string name="update">update</string>
     <string name="update_track_title">Update a finance entry</string>
     <string name="update_track_description">You are going to update this entry. Please, be careful</string>

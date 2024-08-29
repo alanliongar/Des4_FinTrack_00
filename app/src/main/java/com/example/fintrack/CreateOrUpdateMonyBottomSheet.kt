@@ -16,7 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 
 class CreateOrUpdateMonyBottomSheet(
-    private val catList: List<CatUiData>,
+    private val catList: List<CatEntity>,
     private val mony: MonyUiData? = null,
     private val onCreateClicked: (MonyUiData) -> Unit,
     private val onUpdateClicked: (MonyUiData) -> Unit,
@@ -35,6 +35,7 @@ class CreateOrUpdateMonyBottomSheet(
 
         var monyCat: String? = null //aqui ainda nao é inicializado
         val catStrs: List<String> = catList.map {
+            //if (it.name != "+" && it.name !="ALL"){
             it.name
         }
 
@@ -66,7 +67,7 @@ class CreateOrUpdateMonyBottomSheet(
             bsTvTitle.setText(R.string.update_track_title)
             btnMCreateOrUpdate.setText(R.string.update)
             tieMonyName.setText(mony.name)
-            val currentCat: CatUiData = catList.first { it.name == mony.category }
+            val currentCat: CatEntity = catList.first { it.name == mony.category }
             val index = catList.indexOf(currentCat)
             spinner.setSelection(index)
         }

@@ -2,11 +2,17 @@ package com.example.fintrack
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    indices = [Index(value = ["name", "cat","val"], unique = true)]
+    indices = [Index(value = ["name", "cat", "val"], unique = true)],
+    foreignKeys = [ForeignKey(
+        entity = CatEntity::class,
+        parentColumns = ["key"],
+        childColumns = ["cat"]
+    )]
 )
 //nessa parte aqui de cima do código, depois eu posso remover, por que não vou precisar de "registros padrão".
 data class MonyEntity(
