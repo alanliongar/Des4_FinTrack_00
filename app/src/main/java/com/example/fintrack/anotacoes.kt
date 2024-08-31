@@ -49,4 +49,8 @@ o app desde o começo.
     * Próximos passos: remover o pré-selecionado do spinner e colocar alguma frase pro usuário, e fazer o estado de vazio do app pro usuário começar a mexer nele.
     * */
 
+    /*
+    * Dia 18: eu apenas aprendi que o celular quando faz o backup, precisa que a base seja deletada forçosamente.
+    * */
+
 }

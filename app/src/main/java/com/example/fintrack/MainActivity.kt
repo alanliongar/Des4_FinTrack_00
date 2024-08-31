@@ -19,8 +19,11 @@ class MainActivity : AppCompatActivity() {
     private val catListAdapter = CatListAdapter()
     val monyListAdapter = MonyListAdapter()
     private val db by lazy {
-        Room.databaseBuilder(applicationContext, FinTrackDataBase::class.java, "database-fintrack")
-            .build()
+        Room.databaseBuilder(
+            applicationContext,
+            FinTrackDataBase::class.java,
+            "database-fintrack"
+        ).fallbackToDestructiveMigrationFrom().build()
     }
     private val catDao: CatDao by lazy {
         db.getCatDao()
@@ -33,6 +36,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val (dados, categories) = createObjects(applicationContext)
+        //applicationContext.deleteDatabase("database-fintrack-2")// É bom saber que dá pra fazer isso em "casos de emergencia"
         val rvMony: RecyclerView = findViewById<RecyclerView>(R.id.rv_dados)
         rvMony.adapter = monyListAdapter
         val rvCat: RecyclerView = findViewById<RecyclerView>(R.id.rv_category)
@@ -225,31 +229,36 @@ class MainActivity : AppCompatActivity() {
 
     private fun showCreateUpdateMonyBottomSheet(monyUiData: MonyUiData? = null) {
         val createOrUpdateMonyBottomSheet =
-            CreateOrUpdateMonyBottomSheet(catsEnt, monyUiData, onCreateClicked = { monyToBeCreated ->
-                val monyEntityToBeInsert = MonyEntity(
-                    id = 0,
-                    name = monyToBeCreated.name,
-                    category = monyToBeCreated.category,
-                    value = 2.0
-                )
-                insertMony(monyEntityToBeInsert)
-            }, onUpdateClicked = { monyToBeUpdated ->
-                val monyyToBeUpdated = MonyEntity(
-                    id = monyToBeUpdated.id,
-                    name = monyToBeUpdated.name,
-                    category = monyToBeUpdated.category,
-                    value = monyToBeUpdated.value
-                )
-                updateMony(monyyToBeUpdated)
-            }, onDeleteClicked = { monyToBeDeleted ->
-                val monyyToBeDeleted: MonyEntity = MonyEntity(
-                    id = monyToBeDeleted.id,
-                    name = monyToBeDeleted.name,
-                    category = monyToBeDeleted.category,
-                    value = monyToBeDeleted.value
-                )
-                deleteMony(monyyToBeDeleted)
-            })
+            CreateOrUpdateMonyBottomSheet(
+                catsEnt,
+                monyUiData,
+                onCreateClicked = { monyToBeCreated ->
+                    val monyEntityToBeInsert = MonyEntity(
+                        id = 0,
+                        name = monyToBeCreated.name,
+                        category = monyToBeCreated.category,
+                        value = 2.0
+                    )
+                    insertMony(monyEntityToBeInsert)
+                },
+                onUpdateClicked = { monyToBeUpdated ->
+                    val monyyToBeUpdated = MonyEntity(
+                        id = monyToBeUpdated.id,
+                        name = monyToBeUpdated.name,
+                        category = monyToBeUpdated.category,
+                        value = monyToBeUpdated.value
+                    )
+                    updateMony(monyyToBeUpdated)
+                },
+                onDeleteClicked = { monyToBeDeleted ->
+                    val monyyToBeDeleted: MonyEntity = MonyEntity(
+                        id = monyToBeDeleted.id,
+                        name = monyToBeDeleted.name,
+                        category = monyToBeDeleted.category,
+                        value = monyToBeDeleted.value
+                    )
+                    deleteMony(monyyToBeDeleted)
+                })
         createOrUpdateMonyBottomSheet.show(supportFragmentManager, "createMonyBottomSheet")
     }
 }
