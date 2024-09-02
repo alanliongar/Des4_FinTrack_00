@@ -11,4 +11,7 @@
     <string name="update">update</string>
     <string name="update_track_title">Update a finance entry</string>
     <string name="update_track_description">You are going to update this entry. Please, be careful</string>
+    <string name="empty_state_tit">No category found</string>
+    <string name="empty_state_desc">Please create one</string>
+    <string name="tb_new_category">New Category</string>
 </resources>

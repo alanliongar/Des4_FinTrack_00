@@ -50,7 +50,47 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/rv_category"
-        tools:listitem="@layout/item_mony" />
+        tools:listitem="@layout/item_mony"
+        tools:visibility="invisible" />
+
+    <LinearLayout
+        android:id="@+id/ll_empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/empty_state_tit"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="08dp"
+            android:text="@string/empty_state_desc"
+            android:textSize="18sp"
+            android:textStyle="" />
+
+        <ImageView
+            android:layout_width="300dp"
+            android:layout_height="250dp"
+            android:src="@drawable/ic_empty_list" />
+
+        <Button
+            android:id="@+id/btn_create_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:paddingHorizontal="80dp"
+            android:paddingVertical="20dp"
+            android:text="@string/create"
+            android:textSize="20sp" />
+
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_create_mony"

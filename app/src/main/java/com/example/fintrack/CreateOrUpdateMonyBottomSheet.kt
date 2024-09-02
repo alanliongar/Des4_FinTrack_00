@@ -34,10 +34,16 @@ class CreateOrUpdateMonyBottomSheet(
         val spinner: Spinner = view.findViewById<Spinner>(R.id.cat_list)
 
         var monyCat: String? = null //aqui ainda nao é inicializado
-        val catStrs: List<String> = catList.map {
-            //if (it.name != "+" && it.name !="ALL"){
-            it.name
-        }
+
+        val catTemp = mutableListOf<String>("Select")
+
+        catTemp.addAll(
+            catList.map {
+                it.name
+            }
+        )
+
+        val catStrs: List<String> = catTemp
 
         ArrayAdapter(
             requireActivity().baseContext, android.R.layout.simple_spinner_item, catStrs
@@ -67,21 +73,29 @@ class CreateOrUpdateMonyBottomSheet(
             bsTvTitle.setText(R.string.update_track_title)
             btnMCreateOrUpdate.setText(R.string.update)
             tieMonyName.setText(mony.name)
-            val currentCat: CatEntity = catList.first { it.name == mony.category }
+
+            val currentCat = mony.category
+            val index = catTemp.indexOf(currentCat) // catTemp é a lista usada no spinner
+            if (index >= 0) {
+                spinner.setSelection(index)
+            }
+            /*val currentCat: CatEntity = catList.first { it.name == mony.category }
             val index = catList.indexOf(currentCat)
-            spinner.setSelection(index)
+            spinner.setSelection(index)*/
         }
 
         btnMDelete.setOnClickListener {
             if (mony == null) {
-                Log.d("CreateOrUpdateMonyBottomSheet", "Task not found")
+                Log.d("CrOrUpMonyBottomSheet", "Task not found")
             } else {
                 onDeleteClicked.invoke(mony)
                 dismiss()
             }
         }
         btnMCreateOrUpdate.setOnClickListener {
-            if (monyCat != null && tieMonyName.text.toString().trim().isNotEmpty()) {
+            if (monyCat != "Select" && tieMonyName.text.toString().trim()
+                    .isNotEmpty()
+            ) { //aqui é pra criar ou fazer update somente se não for select e se não for vazio.
                 if (mony == null) {
                     onCreateClicked.invoke(
                         MonyUiData(

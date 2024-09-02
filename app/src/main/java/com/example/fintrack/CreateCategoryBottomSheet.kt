@@ -19,7 +19,7 @@ class CreateCategoryBottomSheet(private val onCreateClicked: (String) -> Unit) :
         val btnCreate = view.findViewById<Button>(R.id.btn_cat_create)
         val tieCatName = view.findViewById<TextInputEditText>(R.id.tie_cat_name)
         btnCreate.setOnClickListener {
-            val name = tieCatName.text.toString()
+            val name = tieCatName.text.toString().trim()
             onCreateClicked.invoke(name)
             dismiss()
         }

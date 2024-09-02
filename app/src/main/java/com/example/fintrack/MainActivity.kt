@@ -2,8 +2,11 @@ package com.example.fintrack
 //anotações coloquei num arquivo próprio
 import android.content.Context
 import android.os.Bundle
+import android.widget.Button
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -17,12 +20,14 @@ class MainActivity : AppCompatActivity() {
     private var catsEnt = listOf<CatEntity>()
     private var monyy = listOf<MonyUiData>()
     private val catListAdapter = CatListAdapter()
+    private lateinit var rvMony: RecyclerView
+    private lateinit var ctnEmptyView: LinearLayout
+    private lateinit var fabCreateMony: FloatingActionButton
+    private lateinit var rvCat: RecyclerView
     val monyListAdapter = MonyListAdapter()
     private val db by lazy {
         Room.databaseBuilder(
-            applicationContext,
-            FinTrackDataBase::class.java,
-            "database-fintrack"
+            applicationContext, FinTrackDataBase::class.java, "database-fintrack"
         ).fallbackToDestructiveMigrationFrom().build()
     }
     private val catDao: CatDao by lazy {
@@ -37,13 +42,23 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val (dados, categories) = createObjects(applicationContext)
         //applicationContext.deleteDatabase("database-fintrack-2")// É bom saber que dá pra fazer isso em "casos de emergencia"
-        val rvMony: RecyclerView = findViewById<RecyclerView>(R.id.rv_dados)
+        rvMony = findViewById(R.id.rv_dados)
+        ctnEmptyView = findViewById(R.id.ll_empty_view)
         rvMony.adapter = monyListAdapter
-        val rvCat: RecyclerView = findViewById<RecyclerView>(R.id.rv_category)
+        rvCat = findViewById(R.id.rv_category)
         rvCat.adapter = catListAdapter
-        val fabCreateMony: FloatingActionButton =
-            findViewById<FloatingActionButton>(R.id.fab_create_mony)
+        fabCreateMony = findViewById(R.id.fab_create_mony)
+        val btnCreateEmpty: Button = findViewById<Button>(R.id.btn_create_empty)
+        GlobalScope.launch(Dispatchers.Main) { //essa parte aqui coloquei pra evitar piscar o estado de vazio pro usuário
+            rvMony.isVisible = true
+            ctnEmptyView.isVisible = false
+            fabCreateMony.isVisible = true
+            rvCat.isVisible = true
 
+        }
+        btnCreateEmpty.setOnClickListener {
+            showCreateCatBottomSheet()
+        }
         fabCreateMony.setOnClickListener {
             showCreateUpdateMonyBottomSheet()
         }
@@ -58,15 +73,7 @@ class MainActivity : AppCompatActivity() {
 
         catListAdapter.setOnClickListener { selected ->
             if (selected.name == "+") {
-                val createCategoryBottomSheet = CreateCategoryBottomSheet() { categoryName ->
-                    val catEntity = CatEntity(
-                        name = categoryName, color = 50, //ajustar a cor aqui
-                        isSelected = false
-                    )
-                    insertCat(catEntity)
-                }
-                createCategoryBottomSheet.show(supportFragmentManager, "createCategoryBottomSheet")
-                //Snackbar.make(rvCat, "+ is selected", Snackbar.LENGTH_LONG).show()
+                showCreateCatBottomSheet()
             } else {
                 val catTemp = catss.map { item ->
                     when {
@@ -140,14 +147,30 @@ class MainActivity : AppCompatActivity() {
         withContext(Dispatchers.IO) {
             val categoriesFromDb: List<CatEntity> = catDao.getAll()
             catsEnt = categoriesFromDb
+            withContext(Dispatchers.Main) {
+                if (catsEnt.isEmpty()) {
+                    rvMony.isVisible = false
+                    ctnEmptyView.isVisible = true
+                    rvCat.isVisible = false
+                    fabCreateMony.isVisible = false
+                } else {
+                    rvMony.isVisible = true
+                    ctnEmptyView.isVisible = false
+                    rvCat.isVisible = true
+                    fabCreateMony.isVisible = true
+                }
+            }
             val categoriesFromDbUiData = categoriesFromDb.map {
                 CatUiData(name = it.name, color = it.color, isSelected = it.isSelected)
             }.toMutableList()
+
             categoriesFromDbUiData.add(CatUiData("+", 0, false))
+            val tempCatList = mutableListOf<CatUiData>()
+            if (monyy.isNotEmpty()){
+                tempCatList.add(CatUiData("ALL", 0, false))
+            }
 
-            val tempCatList = mutableListOf(CatUiData("ALL", 0, false))
             tempCatList.addAll(categoriesFromDbUiData)
-
             catss = tempCatList
             withContext(Dispatchers.Main) {
                 catListAdapter.submitList(catss)
@@ -162,6 +185,7 @@ class MainActivity : AppCompatActivity() {
                 MonyUiData(it.id, name = it.name, category = it.category, value = it.value)
             }
             monyy = monyFromDbUiData
+            getCatFromDB() //eu adicionei essa chamada, somente para lidar com a adição de "all" de maneira responsiva
             withContext(Dispatchers.Main) {
                 monyListAdapter.submitList(monyy)
             }
@@ -228,39 +252,50 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun showCreateUpdateMonyBottomSheet(monyUiData: MonyUiData? = null) {
-        val createOrUpdateMonyBottomSheet =
-            CreateOrUpdateMonyBottomSheet(
-                catsEnt,
-                monyUiData,
-                onCreateClicked = { monyToBeCreated ->
-                    val monyEntityToBeInsert = MonyEntity(
-                        id = 0,
-                        name = monyToBeCreated.name,
-                        category = monyToBeCreated.category,
-                        value = 2.0
-                    )
-                    insertMony(monyEntityToBeInsert)
-                },
-                onUpdateClicked = { monyToBeUpdated ->
-                    val monyyToBeUpdated = MonyEntity(
-                        id = monyToBeUpdated.id,
-                        name = monyToBeUpdated.name,
-                        category = monyToBeUpdated.category,
-                        value = monyToBeUpdated.value
-                    )
-                    updateMony(monyyToBeUpdated)
-                },
-                onDeleteClicked = { monyToBeDeleted ->
-                    val monyyToBeDeleted: MonyEntity = MonyEntity(
-                        id = monyToBeDeleted.id,
-                        name = monyToBeDeleted.name,
-                        category = monyToBeDeleted.category,
-                        value = monyToBeDeleted.value
-                    )
-                    deleteMony(monyyToBeDeleted)
-                })
+        val createOrUpdateMonyBottomSheet = CreateOrUpdateMonyBottomSheet(catsEnt,
+            monyUiData,
+            onCreateClicked = { monyToBeCreated ->
+                val monyEntityToBeInsert = MonyEntity(
+                    id = 0,
+                    name = monyToBeCreated.name,
+                    category = monyToBeCreated.category,
+                    value = 2.0
+                )
+                insertMony(monyEntityToBeInsert)
+            },
+            onUpdateClicked = { monyToBeUpdated ->
+                val monyyToBeUpdated = MonyEntity(
+                    id = monyToBeUpdated.id,
+                    name = monyToBeUpdated.name,
+                    category = monyToBeUpdated.category,
+                    value = monyToBeUpdated.value
+                )
+                updateMony(monyyToBeUpdated)
+            },
+            onDeleteClicked = { monyToBeDeleted ->
+                val monyyToBeDeleted: MonyEntity = MonyEntity(
+                    id = monyToBeDeleted.id,
+                    name = monyToBeDeleted.name,
+                    category = monyToBeDeleted.category,
+                    value = monyToBeDeleted.value
+                )
+                deleteMony(monyyToBeDeleted)
+            })
         createOrUpdateMonyBottomSheet.show(supportFragmentManager, "createMonyBottomSheet")
     }
+
+    private fun showCreateCatBottomSheet() {
+        val createCategoryBottomSheet = CreateCategoryBottomSheet() { categoryName ->
+            val catEntity = CatEntity(
+                name = categoryName, color = 50, //ajustar a cor aqui
+                isSelected = false
+            )
+            insertCat(catEntity)
+        }
+        createCategoryBottomSheet.show(supportFragmentManager, "createCategoryBottomSheet")
+        //Snackbar.make(rvCat, "+ is selected", Snackbar.LENGTH_LONG).show()
+    }
+
 }
 
 fun createObjects(context: Context): Pair<List<MonyUiData>, List<CatUiData>> {

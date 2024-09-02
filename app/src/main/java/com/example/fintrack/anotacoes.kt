@@ -53,4 +53,6 @@ o app desde o começo.
     * Dia 18: eu apenas aprendi que o celular quando faz o backup, precisa que a base seja deletada forçosamente.
     * */
 
+    /*Dia 19: 4h de estudos: fiz os retoques "finais" do app, segundo as aulas, falta agora fazer os ajustes próprios do app fintrack.*/
+
 }
