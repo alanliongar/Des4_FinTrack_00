@@ -67,8 +67,8 @@ class MainActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.Main) {
             insertDefaultCat(categories) //inserindo dados padrão
             insertDefaultMony(dados)
-            getCatFromDB() //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
-            getMonyFromDB() //mesma coisa aqui
+            getMonyFromDB() //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
+            getCatFromDB() //mesma coisa aqui
         }
 
         catListAdapter.setOnClickListener { selected ->
@@ -166,13 +166,13 @@ class MainActivity : AppCompatActivity() {
 
             categoriesFromDbUiData.add(CatUiData("+", 0, false))
             val tempCatList = mutableListOf<CatUiData>()
-            if (monyy.isNotEmpty()){
+            if (monyy.isNotEmpty()) {
                 tempCatList.add(CatUiData("ALL", 0, false))
             }
-
             tempCatList.addAll(categoriesFromDbUiData)
-            catss = tempCatList
+
             withContext(Dispatchers.Main) {
+                catss = tempCatList //Testar com essa linha fora do main
                 catListAdapter.submitList(catss)
             }
         }
@@ -184,11 +184,12 @@ class MainActivity : AppCompatActivity() {
             val monyFromDbUiData: List<MonyUiData> = monyFromDb.map {
                 MonyUiData(it.id, name = it.name, category = it.category, value = it.value)
             }
-            monyy = monyFromDbUiData
-            getCatFromDB() //eu adicionei essa chamada, somente para lidar com a adição de "all" de maneira responsiva
+
             withContext(Dispatchers.Main) {
+                monyy = monyFromDbUiData //Testar com essa linha fora do main
                 monyListAdapter.submitList(monyy)
             }
+            getCatFromDB()//eu adicionei essa chamada, somente para lidar com a adição de "all" de maneira responsiva
         }
     }
 
@@ -236,7 +237,6 @@ class MainActivity : AppCompatActivity() {
             monyDao.delete(monyEntity)
             getMonyFromDB()
         }
-
     }
 
     private fun deleteCat(catEntity: CatEntity) {
@@ -244,8 +244,8 @@ class MainActivity : AppCompatActivity() {
             monyDao.deleteAll(monyDao.getAllbyCatName(catEntity.name))
             catDao.delete(catEntity)
             GlobalScope.launch(Dispatchers.Main) {
-                getCatFromDB()
                 getMonyFromDB()
+                getCatFromDB()
             }
         }
     }
