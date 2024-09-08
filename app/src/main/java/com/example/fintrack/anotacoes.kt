@@ -57,6 +57,7 @@ o app desde o começo.
     /*Dia 20: Eu consegui estudar por 1h até agora, jajá vou começar outra sessão. Não andei nada nesse app, mas aprendi como faz o viewbinding pra nao precisar ficar recuperando id*/
     /*
     * Dia 21: Inserí dois recyclerview, e agora preciso saber como faço pra usar eles. O Room não aceita tipo RES, ele aceita somente o tipo INT, preciso entender como corrigir.
+    * 1 commit a mais pq esqueci de ajustar
     * */
 
 
