@@ -55,4 +55,9 @@ o app desde o começo.
 
     /*Dia 19: 4h de estudos: fiz os retoques "finais" do app, segundo as aulas, falta agora fazer os ajustes próprios do app fintrack.*/
     /*Dia 20: Eu consegui estudar por 1h até agora, jajá vou começar outra sessão. Não andei nada nesse app, mas aprendi como faz o viewbinding pra nao precisar ficar recuperando id*/
+    /*
+    * Dia 21: Inserí dois recyclerview, e agora preciso saber como faço pra usar eles. O Room não aceita tipo RES, ele aceita somente o tipo INT, preciso entender como corrigir.
+    * */
+
+
 }

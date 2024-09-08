@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     val monyListAdapter = MonyListAdapter()
     private val db by lazy {
         Room.databaseBuilder(
-            applicationContext, FinTrackDataBase::class.java, "database-fintrack"
+            applicationContext, FinTrackDataBase::class.java, "pagodenacidade"
         ).fallbackToDestructiveMigrationFrom().build()
     }
     private val catDao: CatDao by lazy {
@@ -41,7 +41,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val (dados, categories) = createObjects(applicationContext)
-        //applicationContext.deleteDatabase("database-fintrack-2")// É bom saber que dá pra fazer isso em "casos de emergencia"
+        val (cores, icones) = createLabels(applicationContext)
+
+
         rvMony = findViewById(R.id.rv_dados)
         ctnEmptyView = findViewById(R.id.ll_empty_view)
         rvMony.adapter = monyListAdapter
@@ -49,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         rvCat.adapter = catListAdapter
         fabCreateMony = findViewById(R.id.fab_create_mony)
         val btnCreateEmpty: Button = findViewById<Button>(R.id.btn_create_empty)
-        GlobalScope.launch(Dispatchers.Main) { //essa parte aqui coloquei pra evitar piscar o estado de vazio pro usuário
+        GlobalScope.launch(Dispatchers.Main) {
             rvMony.isVisible = true
             ctnEmptyView.isVisible = false
             fabCreateMony.isVisible = true
@@ -57,7 +59,7 @@ class MainActivity : AppCompatActivity() {
 
         }
         btnCreateEmpty.setOnClickListener {
-            showCreateCatBottomSheet()
+            showCreateCatBottomSheet(cores, icones)
         }
         fabCreateMony.setOnClickListener {
             showCreateUpdateMonyBottomSheet()
@@ -73,22 +75,13 @@ class MainActivity : AppCompatActivity() {
 
         catListAdapter.setOnClickListener { selected ->
             if (selected.name == "+") {
-                showCreateCatBottomSheet()
+                showCreateCatBottomSheet(cores, icones)
             } else {
                 val catTemp = catss.map { item ->
                     when {
-                        item.name == selected.name && item.isSelected -> item.copy(
-                            isSelected = true
-                        )
-
-                        item.name == selected.name && !item.isSelected -> item.copy(
-                            isSelected = true
-                        )
-
-                        item.name != selected.name && item.isSelected -> item.copy(
-                            isSelected = false
-                        )
-
+                        item.name == selected.name && item.isSelected -> item.copy(isSelected = true)
+                        item.name == selected.name && !item.isSelected -> item.copy(isSelected = true)
+                        item.name != selected.name && item.isSelected -> item.copy(isSelected = false)
                         else -> item
                     }
                 } //aqui cattemp é a lista atualizada
@@ -110,7 +103,10 @@ class MainActivity : AppCompatActivity() {
 
                 showInfoDialog(title, desc, btnText) {
                     val catEntityToBeDeleted = CatEntity(
-                        catToBeDeleted.name, catToBeDeleted.color, catToBeDeleted.isSelected
+                        catToBeDeleted.name,
+                        catToBeDeleted.color,
+                        catToBeDeleted.icon,
+                        catToBeDeleted.isSelected
                     )
                     deleteCat(catEntityToBeDeleted)
                 }
@@ -123,7 +119,7 @@ class MainActivity : AppCompatActivity() {
     private suspend fun insertDefaultCat(cats: List<CatUiData>) {
         withContext(Dispatchers.IO) {
             val catEntities = cats.map {
-                CatEntity(it.name, it.color, it.isSelected)
+                CatEntity(it.name, it.color, it.icon, it.isSelected)
             }
             catDao.insertAll(catEntities)
         }
@@ -161,18 +157,37 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             val categoriesFromDbUiData = categoriesFromDb.map {
-                CatUiData(name = it.name, color = it.color, isSelected = it.isSelected)
+                CatUiData(
+                    name = it.name,
+                    color = it.color,
+                    icon = it.icon,
+                    isSelected = it.isSelected
+                )
             }.toMutableList()
 
-            categoriesFromDbUiData.add(CatUiData("+", 0, false))
+            categoriesFromDbUiData.add(
+                CatUiData(
+                    "+",
+                    0,
+                    requireNotNull(getDrawable(R.drawable.empty)),
+                    false
+                )
+            )
             val tempCatList = mutableListOf<CatUiData>()
             if (monyy.isNotEmpty()) {
-                tempCatList.add(CatUiData("ALL", 0, false))
+                tempCatList.add(
+                    CatUiData(
+                        "ALL",
+                        0,
+                        requireNotNull(getDrawable(R.drawable.empty)),
+                        false
+                    )
+                )
             }
             tempCatList.addAll(categoriesFromDbUiData)
 
             withContext(Dispatchers.Main) {
-                catss = tempCatList //Testar com essa linha fora do main
+                catss = tempCatList
                 catListAdapter.submitList(catss)
             }
         }
@@ -186,7 +201,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             withContext(Dispatchers.Main) {
-                monyy = monyFromDbUiData //Testar com essa linha fora do main
+                monyy = monyFromDbUiData
                 monyListAdapter.submitList(monyy)
             }
             getCatFromDB()//eu adicionei essa chamada, somente para lidar com a adição de "all" de maneira responsiva
@@ -199,10 +214,8 @@ class MainActivity : AppCompatActivity() {
             taskTemp = if (category != "ALL") {
                 monyDao.getAllbyCatName(category)
                     .map { MonyUiData(it.id, it.name, it.category, it.value) }
-                //monyy.filter { it.category == selected.name }
             } else {
                 monyDao.getAll().map { MonyUiData(it.id, it.name, it.category, it.value) }
-                //monyy
             }
         }
         withContext(Dispatchers.Main) {
@@ -284,18 +297,55 @@ class MainActivity : AppCompatActivity() {
         createOrUpdateMonyBottomSheet.show(supportFragmentManager, "createMonyBottomSheet")
     }
 
-    private fun showCreateCatBottomSheet() {
+    //verificação
+    private fun showCreateCatBottomSheet(cores: List<Cor>, icones: List<Icon>) {
         val createCategoryBottomSheet = CreateCategoryBottomSheet() { categoryName ->
-            val catEntity = CatEntity(
-                name = categoryName, color = 50, //ajustar a cor aqui
+            /*val catEntity = CatEntity(
+                name = categoryName,
+                color = 50,
+                requireNotNull(getDrawable(R.drawable.empty)),
                 isSelected = false
-            )
-            insertCat(catEntity)
+            )*/
+            //insertCat(catEntity)
         }
+        createCategoryBottomSheet.setData(cores, icones)
         createCategoryBottomSheet.show(supportFragmentManager, "createCategoryBottomSheet")
-        //Snackbar.make(rvCat, "+ is selected", Snackbar.LENGTH_LONG).show()
     }
 
+}
+
+fun createLabels(context: Context): Pair<List<Cor>, List<Icon>> {
+    val cores = listOf(
+        Cor("white", ContextCompat.getColor(context, R.color.white), false),
+        Cor("black", ContextCompat.getColor(context, R.color.black), false),
+        Cor("red", ContextCompat.getColor(context, R.color.red), false),
+        Cor("pink", ContextCompat.getColor(context, R.color.pink), false),
+        Cor("violet", ContextCompat.getColor(context, R.color.violet), false),
+        Cor("ocean_blue", ContextCompat.getColor(context, R.color.ocean_blue), false),
+        Cor("blue", ContextCompat.getColor(context, R.color.blue), false),
+        Cor("water_blue", ContextCompat.getColor(context, R.color.water_blue), false),
+        Cor("water_green", ContextCompat.getColor(context, R.color.water_green), false),
+        Cor("green", ContextCompat.getColor(context, R.color.green), false),
+        Cor("light_yellow", ContextCompat.getColor(context, R.color.light_yellow), false),
+        Cor("medium_orange", ContextCompat.getColor(context, R.color.medium_orange), false),
+        Cor("brown", ContextCompat.getColor(context, R.color.brown), false),
+        Cor("grey", ContextCompat.getColor(context, R.color.grey), false),
+    )
+    val icones = listOf(
+        Icon("camiseta", ContextCompat.getDrawable(context, R.drawable.camiseta), false),
+        Icon("carrinho", ContextCompat.getDrawable(context, R.drawable.carrinho), false),
+        Icon("carro", ContextCompat.getDrawable(context, R.drawable.carro), false),
+        Icon("cartao", ContextCompat.getDrawable(context, R.drawable.cartao), false),
+        Icon("casa", ContextCompat.getDrawable(context, R.drawable.casa), false),
+        Icon("chave", ContextCompat.getDrawable(context, R.drawable.chave), false),
+        Icon("energia", ContextCompat.getDrawable(context, R.drawable.energia), false),
+        Icon("gasolina", ContextCompat.getDrawable(context, R.drawable.gasolina), false),
+        Icon("gotadagua", ContextCompat.getDrawable(context, R.drawable.gotadagua), false),
+        Icon("grafico", ContextCompat.getDrawable(context, R.drawable.grafico), false),
+        Icon("joystick", ContextCompat.getDrawable(context, R.drawable.joystick), false),
+        Icon("wifi", ContextCompat.getDrawable(context, R.drawable.wifi), false),
+    )
+    return Pair(cores.toList(), icones.toList())
 }
 
 fun createObjects(context: Context): Pair<List<MonyUiData>, List<CatUiData>> {
@@ -307,10 +357,30 @@ fun createObjects(context: Context): Pair<List<MonyUiData>, List<CatUiData>> {
         MonyUiData(5, "Rent", "House", -134.00)
     )
     val categories = listOf(
-        CatUiData("Internet", ContextCompat.getColor(context, R.color.violet), false),
-        CatUiData("Car", ContextCompat.getColor(context, R.color.red), false),
-        CatUiData("Utilities", ContextCompat.getColor(context, R.color.blue), false),
-        CatUiData("House", ContextCompat.getColor(context, R.color.green), false)
+        CatUiData(
+            "Internet",
+            ContextCompat.getColor(context, R.color.violet),
+            requireNotNull(ContextCompat.getDrawable(context, R.drawable.empty)),
+            false
+        ),
+        CatUiData(
+            "Car",
+            ContextCompat.getColor(context, R.color.red),
+            requireNotNull(ContextCompat.getDrawable(context, R.drawable.empty)),
+            false
+        ),
+        CatUiData(
+            "Utilities",
+            ContextCompat.getColor(context, R.color.blue),
+            requireNotNull(ContextCompat.getDrawable(context, R.drawable.empty)),
+            false
+        ),
+        CatUiData(
+            "House",
+            ContextCompat.getColor(context, R.color.green),
+            requireNotNull(ContextCompat.getDrawable(context, R.drawable.empty)),
+            false
+        )
     )
     return Pair(dados.toList(), categories.toList())
 }
