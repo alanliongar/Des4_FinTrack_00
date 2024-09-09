@@ -69,7 +69,7 @@ o app desde o começo.
     * *///git3
     /*
     * Dia 23 - Finalização do app sem precisar limpá-lo (tirar categorias padrão e remover o método de destruição e recriação do banco.
-    *
+    * Finalização dia 09/09/2024
     * */
 
 
