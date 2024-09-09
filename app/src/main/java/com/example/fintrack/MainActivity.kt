@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     private val db by lazy {
         Room.databaseBuilder(
-            applicationContext, FinTrackDataBase::class.java, "samba-lele"
+            applicationContext, FinTrackDataBase::class.java, "samba-lele-oeee"
         ).fallbackToDestructiveMigrationFrom().build()
     }
     private val catDao: CatDao by lazy {

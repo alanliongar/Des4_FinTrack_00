@@ -66,7 +66,7 @@ o app desde o começo.
     * implementei isso pra buscar a categoria diretamente do banco de dados se disponível, preciso tratar os casos do banco vazio ainda.
     * O que falta? - o textview populado com o total das entradas financeiras (filtradas) na tela;
     * Falta deixar o app tôdo bonitão pra fechar o código e publicar no github a versão final.
-    * */
+    * *///git3
 
 
 }
