@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_marginEnd="8dp">
 
     <ImageView
@@ -22,6 +23,7 @@
         android:layout_height="55dp"
         android:scaleType="fitCenter"
         android:src="@drawable/drawable_icon"
+        tools:src="@drawable/carro"
         app:layout_constraintBottom_toBottomOf="@id/iv_shape"
         app:layout_constraintEnd_toEndOf="@id/iv_shape"
         app:layout_constraintStart_toStartOf="@id/iv_shape"

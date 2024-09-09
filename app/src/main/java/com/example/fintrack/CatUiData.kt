@@ -5,6 +5,6 @@ import android.graphics.drawable.Drawable
 data class CatUiData(
     val name: String,
     val color: Int,
-    val icon: Drawable,
+    val icon: Int,
     val isSelected: Boolean
 )

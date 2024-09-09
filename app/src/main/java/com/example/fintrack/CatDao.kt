@@ -19,4 +19,10 @@ interface CatDao {
 
     @Delete
     fun delete(catEntity: CatEntity)
+
+    /*@Query("Select * from monyentity where cat is :categoryName")
+    fun getAllbyCatName(categoryName: String): List<MonyEntity>*/
+
+    @Query("SELECT * FROM catEntity WHERE [key] is :catName")
+    fun findById(catName: String): CatEntity
 }

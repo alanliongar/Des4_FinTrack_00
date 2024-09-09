@@ -51,7 +51,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/rv_category"
         tools:listitem="@layout/item_mony"
-        tools:visibility="invisible" />
+        tools:visibility="visible" />
 
     <LinearLayout
         android:id="@+id/ll_empty_view"

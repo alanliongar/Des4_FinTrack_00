@@ -3,12 +3,23 @@ package com.example.fintrack
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class MonyListAdapter() : ListAdapter<MonyUiData, MonyListAdapter.MonyViewHolder>(MonyListAdapter) {
+
+class MonyListAdapter(val catDao: CatDao, val lifecycleOwner: LifecycleOwner) :
+    ListAdapter<MonyUiData, MonyListAdapter.MonyViewHolder>(MonyListAdapter) {
+
     private var onClick: (MonyUiData) -> Unit = {}
     private var onLongClick: (MonyUiData) -> Unit = {}
     fun setOnClickListener(onClick: (MonyUiData) -> Unit) {
@@ -26,16 +37,35 @@ class MonyListAdapter() : ListAdapter<MonyUiData, MonyListAdapter.MonyViewHolder
 
     override fun onBindViewHolder(holder: MonyViewHolder, position: Int) {
         val cat = getItem(position)
-        holder.bind(cat, onClick, onLongClick)
+        holder.bind(cat, onClick, onLongClick, catDao, lifecycleOwner)
     }
 
     class MonyViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         private val tvValue = view.findViewById<TextView>(R.id.tv_value)
         private val tvName = view.findViewById<TextView>(R.id.tv_name)
         private val resColor = view.findViewById<View>(R.id.color_view)
-        fun bind(mony: MonyUiData, onClick: (MonyUiData) -> Unit, onLongClick: (MonyUiData) -> Unit) {
+        private val iconView = view.findViewById<ImageView>(R.id.iv_icon)
+
+
+        fun bind(
+            mony: MonyUiData,
+            onClick: (MonyUiData) -> Unit,
+            onLongClick: (MonyUiData) -> Unit,
+            catDao: CatDao,
+            lifecycleOwner: LifecycleOwner
+        ) {
             tvValue.text = mony.value.toString()
             tvName.text = mony.name
+
+            lifecycleOwner.lifecycleScope.launch {
+                val categoria: CatEntity =
+                    withContext(Dispatchers.IO) { catDao.findById(mony.category) }
+                withContext(Dispatchers.Main) {
+                    resColor.setBackgroundColor(categoria.color)
+                    iconView.setImageResource(categoria.icon)
+                }
+            }
+
             view.rootView.setOnClickListener {
                 onClick.invoke(mony)
             }

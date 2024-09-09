@@ -1,11 +1,11 @@
 package com.example.fintrack
 
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
+import androidx.core.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat.getDrawable
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -32,7 +32,7 @@ class IconAdapter : ListAdapter<Icon, IconAdapter.IconViewHolder>(IconAdapter) {
         val imageShape = view.findViewById<ImageView>(R.id.iv_shape)
         fun bind(icon: Icon, onClick: (Icon) -> Unit) {
             // Configure o ImageView com o drawable
-            imageView.setImageDrawable(icon.icone)
+            imageView.setImageResource(icon.icone)
             // Atualize o estado selecionado do ImageView
             imageShape.isSelected = icon.isSelected
             // Defina o fundo do ImageView como um ShapeDrawable

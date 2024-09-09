@@ -24,10 +24,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var ctnEmptyView: LinearLayout
     private lateinit var fabCreateMony: FloatingActionButton
     private lateinit var rvCat: RecyclerView
-    val monyListAdapter = MonyListAdapter()
+
+
     private val db by lazy {
         Room.databaseBuilder(
-            applicationContext, FinTrackDataBase::class.java, "pagodenacidade"
+            applicationContext, FinTrackDataBase::class.java, "samba-lele"
         ).fallbackToDestructiveMigrationFrom().build()
     }
     private val catDao: CatDao by lazy {
@@ -36,16 +37,14 @@ class MainActivity : AppCompatActivity() {
     private val monyDao by lazy {
         db.getMonyDao()
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val (dados, categories) = createObjects(applicationContext)
         val (cores, icones) = createLabels(applicationContext)
-
-
         rvMony = findViewById(R.id.rv_dados)
         ctnEmptyView = findViewById(R.id.ll_empty_view)
+        val monyListAdapter = MonyListAdapter(catDao, this)
         rvMony.adapter = monyListAdapter
         rvCat = findViewById(R.id.rv_category)
         rvCat.adapter = catListAdapter
@@ -61,15 +60,15 @@ class MainActivity : AppCompatActivity() {
         btnCreateEmpty.setOnClickListener {
             showCreateCatBottomSheet(cores, icones)
         }
-        fabCreateMony.setOnClickListener {
-            showCreateUpdateMonyBottomSheet()
+        fabCreateMony.setOnClickListener {//cuidado
+            showCreateUpdateMonyBottomSheet(null,monyListAdapter)
         }
 
 
         GlobalScope.launch(Dispatchers.Main) {
             insertDefaultCat(categories) //inserindo dados padrão
             insertDefaultMony(dados)
-            getMonyFromDB() //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
+            getMonyFromDB(monyListAdapter) //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
             getCatFromDB() //mesma coisa aqui
         }
 
@@ -86,13 +85,13 @@ class MainActivity : AppCompatActivity() {
                     }
                 } //aqui cattemp é a lista atualizada
                 GlobalScope.launch(Dispatchers.Main) {
-                    filterMonyByCatName(selected.name)
+                    filterMonyByCatName(selected.name,monyListAdapter)
                     catListAdapter.submitList(catTemp)
                 }
             }
         }
         monyListAdapter.setOnClickListener { mony ->
-            showCreateUpdateMonyBottomSheet(mony)
+            showCreateUpdateMonyBottomSheet(mony,monyListAdapter)
         }
         catListAdapter.setOnLongClickListener { catToBeDeleted -> //aqui é um catUiData
 
@@ -100,7 +99,6 @@ class MainActivity : AppCompatActivity() {
                 val title = this.getString(R.string.delete_cat_title)
                 val desc = this.getString(R.string.delete_cat_description)
                 val btnText = this.getString(R.string.delete)
-
                 showInfoDialog(title, desc, btnText) {
                     val catEntityToBeDeleted = CatEntity(
                         catToBeDeleted.name,
@@ -108,7 +106,7 @@ class MainActivity : AppCompatActivity() {
                         catToBeDeleted.icon,
                         catToBeDeleted.isSelected
                     )
-                    deleteCat(catEntityToBeDeleted)
+                    deleteCat(catEntityToBeDeleted,monyListAdapter)
                 }
             }
         }/*
@@ -169,7 +167,7 @@ class MainActivity : AppCompatActivity() {
                 CatUiData(
                     "+",
                     0,
-                    requireNotNull(getDrawable(R.drawable.empty)),
+                    requireNotNull(R.drawable.empty),
                     false
                 )
             )
@@ -179,7 +177,7 @@ class MainActivity : AppCompatActivity() {
                     CatUiData(
                         "ALL",
                         0,
-                        requireNotNull(getDrawable(R.drawable.empty)),
+                        requireNotNull(R.drawable.empty),
                         false
                     )
                 )
@@ -193,7 +191,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun getMonyFromDB() {
+    private suspend fun getMonyFromDB(monyListAdapter: MonyListAdapter) {
         withContext(Dispatchers.IO) {
             val monyFromDb: List<MonyEntity> = monyDao.getAll()
             val monyFromDbUiData: List<MonyUiData> = monyFromDb.map {
@@ -208,7 +206,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun filterMonyByCatName(category: String) {
+    private suspend fun filterMonyByCatName(category: String, monyListAdapter:MonyListAdapter) {
         var taskTemp: List<MonyUiData> = emptyList()
         withContext(Dispatchers.IO) {
             taskTemp = if (category != "ALL") {
@@ -231,40 +229,40 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun insertMony(monyEntity: MonyEntity) {
+    private fun insertMony(monyEntity: MonyEntity, monyListAdapter: MonyListAdapter) {
         GlobalScope.launch(Dispatchers.IO) {
             monyDao.insert(monyEntity)
-            getMonyFromDB()
+            getMonyFromDB(monyListAdapter)
         }
     }
 
-    private fun updateMony(monyEntity: MonyEntity) {
+    private fun updateMony(monyEntity: MonyEntity, monyListAdapter: MonyListAdapter) {
         GlobalScope.launch(Dispatchers.IO) {
             monyDao.update(monyEntity)
-            getMonyFromDB()
+            getMonyFromDB(monyListAdapter)
         }
     }
 
-    private fun deleteMony(monyEntity: MonyEntity) {
+    private fun deleteMony(monyEntity: MonyEntity, monyListAdapter: MonyListAdapter) {
         GlobalScope.launch(Dispatchers.IO) {
             monyDao.delete(monyEntity)
-            getMonyFromDB()
+            getMonyFromDB(monyListAdapter)
         }
     }
 
-    private fun deleteCat(catEntity: CatEntity) {
+    private fun deleteCat(catEntity: CatEntity, monyListAdapter: MonyListAdapter) {
         GlobalScope.launch(Dispatchers.IO) {
             monyDao.deleteAll(monyDao.getAllbyCatName(catEntity.name))
             catDao.delete(catEntity)
             GlobalScope.launch(Dispatchers.Main) {
-                getMonyFromDB()
+                getMonyFromDB(monyListAdapter)
                 getCatFromDB()
             }
         }
     }
 
 
-    private fun showCreateUpdateMonyBottomSheet(monyUiData: MonyUiData? = null) {
+    private fun showCreateUpdateMonyBottomSheet(monyUiData: MonyUiData? = null, monyListAdapter: MonyListAdapter) {
         val createOrUpdateMonyBottomSheet = CreateOrUpdateMonyBottomSheet(catsEnt,
             monyUiData,
             onCreateClicked = { monyToBeCreated ->
@@ -274,7 +272,7 @@ class MainActivity : AppCompatActivity() {
                     category = monyToBeCreated.category,
                     value = 2.0
                 )
-                insertMony(monyEntityToBeInsert)
+                insertMony(monyEntityToBeInsert,monyListAdapter)
             },
             onUpdateClicked = { monyToBeUpdated ->
                 val monyyToBeUpdated = MonyEntity(
@@ -283,7 +281,7 @@ class MainActivity : AppCompatActivity() {
                     category = monyToBeUpdated.category,
                     value = monyToBeUpdated.value
                 )
-                updateMony(monyyToBeUpdated)
+                updateMony(monyyToBeUpdated,monyListAdapter)
             },
             onDeleteClicked = { monyToBeDeleted ->
                 val monyyToBeDeleted: MonyEntity = MonyEntity(
@@ -292,21 +290,21 @@ class MainActivity : AppCompatActivity() {
                     category = monyToBeDeleted.category,
                     value = monyToBeDeleted.value
                 )
-                deleteMony(monyyToBeDeleted)
+                deleteMony(monyyToBeDeleted,monyListAdapter)
             })
         createOrUpdateMonyBottomSheet.show(supportFragmentManager, "createMonyBottomSheet")
     }
 
     //verificação
     private fun showCreateCatBottomSheet(cores: List<Cor>, icones: List<Icon>) {
-        val createCategoryBottomSheet = CreateCategoryBottomSheet() { categoryName ->
-            /*val catEntity = CatEntity(
-                name = categoryName,
-                color = 50,
-                requireNotNull(getDrawable(R.drawable.empty)),
-                isSelected = false
-            )*/
-            //insertCat(catEntity)
+        val createCategoryBottomSheet = CreateCategoryBottomSheet() { CatNew ->
+            val catEntity = CatEntity(
+                name = CatNew.name,
+                color = CatNew.color,
+                icon = CatNew.icon,
+                isSelected = CatNew.isSelected
+            )
+            insertCat(catEntity)
         }
         createCategoryBottomSheet.setData(cores, icones)
         createCategoryBottomSheet.show(supportFragmentManager, "createCategoryBottomSheet")
@@ -332,18 +330,18 @@ fun createLabels(context: Context): Pair<List<Cor>, List<Icon>> {
         Cor("grey", ContextCompat.getColor(context, R.color.grey), false),
     )
     val icones = listOf(
-        Icon("camiseta", ContextCompat.getDrawable(context, R.drawable.camiseta), false),
-        Icon("carrinho", ContextCompat.getDrawable(context, R.drawable.carrinho), false),
-        Icon("carro", ContextCompat.getDrawable(context, R.drawable.carro), false),
-        Icon("cartao", ContextCompat.getDrawable(context, R.drawable.cartao), false),
-        Icon("casa", ContextCompat.getDrawable(context, R.drawable.casa), false),
-        Icon("chave", ContextCompat.getDrawable(context, R.drawable.chave), false),
-        Icon("energia", ContextCompat.getDrawable(context, R.drawable.energia), false),
-        Icon("gasolina", ContextCompat.getDrawable(context, R.drawable.gasolina), false),
-        Icon("gotadagua", ContextCompat.getDrawable(context, R.drawable.gotadagua), false),
-        Icon("grafico", ContextCompat.getDrawable(context, R.drawable.grafico), false),
-        Icon("joystick", ContextCompat.getDrawable(context, R.drawable.joystick), false),
-        Icon("wifi", ContextCompat.getDrawable(context, R.drawable.wifi), false),
+        Icon("camiseta", R.drawable.camiseta, false),
+        Icon("carrinho", R.drawable.carrinho, false),
+        Icon("carro", R.drawable.carro, false),
+        Icon("cartao", R.drawable.cartao, false),
+        Icon("casa", R.drawable.casa, false),
+        Icon("chave", R.drawable.chave, false),
+        Icon("energia", R.drawable.energia, false),
+        Icon("gasolina", R.drawable.gasolina, false),
+        Icon("gotadagua", R.drawable.gotadagua, false),
+        Icon("grafico", R.drawable.grafico, false),
+        Icon("joystick", R.drawable.joystick, false),
+        Icon("wifi", R.drawable.wifi, false),
     )
     return Pair(cores.toList(), icones.toList())
 }
@@ -360,25 +358,25 @@ fun createObjects(context: Context): Pair<List<MonyUiData>, List<CatUiData>> {
         CatUiData(
             "Internet",
             ContextCompat.getColor(context, R.color.violet),
-            requireNotNull(ContextCompat.getDrawable(context, R.drawable.empty)),
+            requireNotNull(R.drawable.wifi),
             false
         ),
         CatUiData(
             "Car",
             ContextCompat.getColor(context, R.color.red),
-            requireNotNull(ContextCompat.getDrawable(context, R.drawable.empty)),
+            requireNotNull(R.drawable.carro),
             false
         ),
         CatUiData(
             "Utilities",
             ContextCompat.getColor(context, R.color.blue),
-            requireNotNull(ContextCompat.getDrawable(context, R.drawable.empty)),
+            requireNotNull(R.drawable.joystick),
             false
         ),
         CatUiData(
             "House",
             ContextCompat.getColor(context, R.color.green),
-            requireNotNull(ContextCompat.getDrawable(context, R.drawable.empty)),
+            requireNotNull(R.drawable.casa),
             false
         )
     )

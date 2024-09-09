@@ -26,11 +26,11 @@ class CreateOrUpdateMonyBottomSheet(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.create_or_update_mony_bottom_sheet, container, false)
-
         val bsTvTitle: TextView = view.findViewById<TextView>(R.id.tv_title_mony_bs)
         val btnMCreateOrUpdate = view.findViewById<Button>(R.id.btn_mony_create_or_update)
         val btnMDelete = view.findViewById<Button>(R.id.btn_mony_delete)
         val tieMonyName = view.findViewById<TextInputEditText>(R.id.tie_mony_name)
+        val tieMonyValue = view.findViewById<TextInputEditText>(R.id.tie_mony_value)
         val spinner: Spinner = view.findViewById<Spinner>(R.id.cat_list)
 
         var monyCat: String? = null //aqui ainda nao é inicializado
@@ -93,16 +93,15 @@ class CreateOrUpdateMonyBottomSheet(
             }
         }
         btnMCreateOrUpdate.setOnClickListener {
-            if (monyCat != "Select" && tieMonyName.text.toString().trim()
-                    .isNotEmpty()
-            ) { //aqui é pra criar ou fazer update somente se não for select e se não for vazio.
+            if (monyCat != "Select" && tieMonyName.text.toString().trim().isNotEmpty() && tieMonyValue.text.toString().trim().isNotEmpty()) {
+                //aqui é pra criar ou fazer update somente se não for select e se não for vazio.
                 if (mony == null) {
                     onCreateClicked.invoke(
                         MonyUiData(
                             id = 0,
                             name = tieMonyName.text.toString().trim(),
                             category = requireNotNull(monyCat),
-                            250.0 //preciso criar a regra completa pra pegar o valor tbm
+                            tieMonyValue.text.toString().trim().toDouble() //preciso criar a regra completa pra pegar o valor tbm
                         )
                     )
                 } else {
@@ -111,7 +110,7 @@ class CreateOrUpdateMonyBottomSheet(
                             id = mony.id,
                             name = tieMonyName.text.toString().trim(),
                             category = requireNotNull(monyCat),
-                            value = mony.value //aqui deve fazer o update do valor também, quando for corrigir
+                            value = tieMonyValue.text.toString().trim().toDouble() //aqui deve fazer o update do valor também, quando for corrigir
                         )
                     )
                 }

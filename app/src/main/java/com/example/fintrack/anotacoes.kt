@@ -60,5 +60,13 @@ o app desde o começo.
     * 1 commit a mais pq esqueci de ajustar
     * */
 
+    /*
+    * Dia 22: Hoje aprendi bastante coisa, terminei de implementar os dois recyclerview das cores e dos ícones pro usuário;
+    * aprendi como funciona o lifeCycleOwner e o lifecycleScope, assim como as diferenças pro globalscope e pro suspendfunction
+    * implementei isso pra buscar a categoria diretamente do banco de dados se disponível, preciso tratar os casos do banco vazio ainda.
+    * O que falta? - o textview populado com o total das entradas financeiras (filtradas) na tela;
+    * Falta deixar o app tôdo bonitão pra fechar o código e publicar no github a versão final.
+    * */
+
 
 }
