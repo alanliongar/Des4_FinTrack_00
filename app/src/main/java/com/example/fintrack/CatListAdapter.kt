@@ -12,7 +12,6 @@ class CatListAdapter : ListAdapter<CatUiData, CatListAdapter.CatViewHolder>(CatL
     private var onClick: (CatUiData) -> Unit = {}
     private var onLongClick: (CatUiData) -> Unit = {}
 
-
     fun setOnClickListener(onClick: (CatUiData) -> Unit) {
         this.onClick = onClick
     }
@@ -34,10 +33,10 @@ class CatListAdapter : ListAdapter<CatUiData, CatListAdapter.CatViewHolder>(CatL
 
     class CatViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         private val tvName = view.findViewById<TextView>(R.id.tv_catname)
-        //private val catColor = view.findViewById<View>(R.id.)
 
         fun bind(cat: CatUiData, onClick: (CatUiData) -> Unit, onLongClick: (CatUiData) -> Unit) {
             tvName.text = cat.name
+            tvName.isSelected = cat.isSelected
             view.setOnLongClickListener {
                 onLongClick.invoke(cat)
                 true
@@ -47,7 +46,6 @@ class CatListAdapter : ListAdapter<CatUiData, CatListAdapter.CatViewHolder>(CatL
             }
         }
     }
-
     companion object : DiffUtil.ItemCallback<CatUiData>() {
         override fun areItemsTheSame(oldItem: CatUiData, newItem: CatUiData): Boolean {
             return oldItem == newItem
@@ -56,6 +54,5 @@ class CatListAdapter : ListAdapter<CatUiData, CatListAdapter.CatViewHolder>(CatL
         override fun areContentsTheSame(oldItem: CatUiData, newItem: CatUiData): Boolean {
             return oldItem.name == newItem.name
         }
-
     }
 }

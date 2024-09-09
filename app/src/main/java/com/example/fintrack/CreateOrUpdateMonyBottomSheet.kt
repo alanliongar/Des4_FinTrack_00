@@ -33,7 +33,7 @@ class CreateOrUpdateMonyBottomSheet(
         val tieMonyValue = view.findViewById<TextInputEditText>(R.id.tie_mony_value)
         val spinner: Spinner = view.findViewById<Spinner>(R.id.cat_list)
 
-        var monyCat: String? = null //aqui ainda nao é inicializado
+        var monyCat: String? = null
 
         val catTemp = mutableListOf<String>("Select")
 
@@ -46,9 +46,9 @@ class CreateOrUpdateMonyBottomSheet(
         val catStrs: List<String> = catTemp
 
         ArrayAdapter(
-            requireActivity().baseContext, android.R.layout.simple_spinner_item, catStrs
+            requireActivity().baseContext, R.layout.item_spinner, catStrs
         ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_item)
+            adapter.setDropDownViewResource(R.layout.item_spinner)
             spinner.adapter = adapter
         }
 
@@ -73,15 +73,13 @@ class CreateOrUpdateMonyBottomSheet(
             bsTvTitle.setText(R.string.update_track_title)
             btnMCreateOrUpdate.setText(R.string.update)
             tieMonyName.setText(mony.name)
+            tieMonyValue.setText(mony.value.toString())
 
             val currentCat = mony.category
-            val index = catTemp.indexOf(currentCat) // catTemp é a lista usada no spinner
+            val index = catTemp.indexOf(currentCat)
             if (index >= 0) {
                 spinner.setSelection(index)
             }
-            /*val currentCat: CatEntity = catList.first { it.name == mony.category }
-            val index = catList.indexOf(currentCat)
-            spinner.setSelection(index)*/
         }
 
         btnMDelete.setOnClickListener {
@@ -94,14 +92,13 @@ class CreateOrUpdateMonyBottomSheet(
         }
         btnMCreateOrUpdate.setOnClickListener {
             if (monyCat != "Select" && tieMonyName.text.toString().trim().isNotEmpty() && tieMonyValue.text.toString().trim().isNotEmpty()) {
-                //aqui é pra criar ou fazer update somente se não for select e se não for vazio.
                 if (mony == null) {
                     onCreateClicked.invoke(
                         MonyUiData(
                             id = 0,
                             name = tieMonyName.text.toString().trim(),
                             category = requireNotNull(monyCat),
-                            tieMonyValue.text.toString().trim().toDouble() //preciso criar a regra completa pra pegar o valor tbm
+                            tieMonyValue.text.toString().trim().toDouble()
                         )
                     )
                 } else {
@@ -110,7 +107,7 @@ class CreateOrUpdateMonyBottomSheet(
                             id = mony.id,
                             name = tieMonyName.text.toString().trim(),
                             category = requireNotNull(monyCat),
-                            value = tieMonyValue.text.toString().trim().toDouble() //aqui deve fazer o update do valor também, quando for corrigir
+                            value = tieMonyValue.text.toString().trim().toDouble()
                         )
                     )
                 }

@@ -67,6 +67,10 @@ o app desde o começo.
     * O que falta? - o textview populado com o total das entradas financeiras (filtradas) na tela;
     * Falta deixar o app tôdo bonitão pra fechar o código e publicar no github a versão final.
     * *///git3
+    /*
+    * Dia 23 - Finalização do app sem precisar limpá-lo (tirar categorias padrão e remover o método de destruição e recriação do banco.
+    *
+    * */
 
 
 }

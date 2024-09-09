@@ -1,9 +1,11 @@
 package com.example.fintrack
-//anotações coloquei num arquivo próprio
+
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -24,11 +26,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var ctnEmptyView: LinearLayout
     private lateinit var fabCreateMony: FloatingActionButton
     private lateinit var rvCat: RecyclerView
+    private lateinit var tvTotal: TextView
+    private lateinit var ctnTotalView: LinearLayout
 
 
     private val db by lazy {
         Room.databaseBuilder(
-            applicationContext, FinTrackDataBase::class.java, "samba-lele-oeee"
+            applicationContext, FinTrackDataBase::class.java, "samba-lele-oeee-oee-sum"
         ).fallbackToDestructiveMigrationFrom().build()
     }
     private val catDao: CatDao by lazy {
@@ -37,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private val monyDao by lazy {
         db.getMonyDao()
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -44,32 +49,34 @@ class MainActivity : AppCompatActivity() {
         val (cores, icones) = createLabels(applicationContext)
         rvMony = findViewById(R.id.rv_dados)
         ctnEmptyView = findViewById(R.id.ll_empty_view)
+        ctnTotalView = findViewById(R.id.ll_text)
         val monyListAdapter = MonyListAdapter(catDao, this)
         rvMony.adapter = monyListAdapter
         rvCat = findViewById(R.id.rv_category)
         rvCat.adapter = catListAdapter
         fabCreateMony = findViewById(R.id.fab_create_mony)
         val btnCreateEmpty: Button = findViewById<Button>(R.id.btn_create_empty)
+        tvTotal = findViewById(R.id.tv_total)
         GlobalScope.launch(Dispatchers.Main) {
             rvMony.isVisible = true
             ctnEmptyView.isVisible = false
             fabCreateMony.isVisible = true
             rvCat.isVisible = true
-
+            ctnTotalView.isVisible = true
         }
         btnCreateEmpty.setOnClickListener {
             showCreateCatBottomSheet(cores, icones)
         }
-        fabCreateMony.setOnClickListener {//cuidado
-            showCreateUpdateMonyBottomSheet(null,monyListAdapter)
+        fabCreateMony.setOnClickListener {
+            showCreateUpdateMonyBottomSheet(null, monyListAdapter)
         }
 
 
         GlobalScope.launch(Dispatchers.Main) {
-            insertDefaultCat(categories) //inserindo dados padrão
+            insertDefaultCat(categories)
             insertDefaultMony(dados)
-            getMonyFromDB(monyListAdapter) //essa função recebe o adapter e dentro dela a troca de thread acontece pra popular o RV
-            getCatFromDB() //mesma coisa aqui
+            getMonyFromDB(monyListAdapter)
+            getCatFromDB()
         }
 
         catListAdapter.setOnClickListener { selected ->
@@ -83,18 +90,21 @@ class MainActivity : AppCompatActivity() {
                         item.name != selected.name && item.isSelected -> item.copy(isSelected = false)
                         else -> item
                     }
-                } //aqui cattemp é a lista atualizada
+                }
+
                 GlobalScope.launch(Dispatchers.Main) {
-                    filterMonyByCatName(selected.name,monyListAdapter)
+                    filterMonyByCatName(selected.name, monyListAdapter)
                     catListAdapter.submitList(catTemp)
+                    val valor = getTotalValue(selected.name)
+                    tvTotal.text = String.format("$%,.2f", valor)
+                    Log.d("Alannn", valor.toString())
                 }
             }
         }
         monyListAdapter.setOnClickListener { mony ->
-            showCreateUpdateMonyBottomSheet(mony,monyListAdapter)
+            showCreateUpdateMonyBottomSheet(mony, monyListAdapter)
         }
-        catListAdapter.setOnLongClickListener { catToBeDeleted -> //aqui é um catUiData
-
+        catListAdapter.setOnLongClickListener { catToBeDeleted ->
             if (catToBeDeleted.name != "+" && catToBeDeleted.name != "ALL") {
                 val title = this.getString(R.string.delete_cat_title)
                 val desc = this.getString(R.string.delete_cat_description)
@@ -106,12 +116,10 @@ class MainActivity : AppCompatActivity() {
                         catToBeDeleted.icon,
                         catToBeDeleted.isSelected
                     )
-                    deleteCat(catEntityToBeDeleted,monyListAdapter)
+                    deleteCat(catEntityToBeDeleted, monyListAdapter)
                 }
             }
-        }/*
-        monyListAdapter.setOnLongClickListener { selected ->
-        }*/
+        }
     }
 
     private suspend fun insertDefaultCat(cats: List<CatUiData>) {
@@ -147,11 +155,13 @@ class MainActivity : AppCompatActivity() {
                     ctnEmptyView.isVisible = true
                     rvCat.isVisible = false
                     fabCreateMony.isVisible = false
+                    ctnTotalView.isVisible = false
                 } else {
                     rvMony.isVisible = true
                     ctnEmptyView.isVisible = false
                     rvCat.isVisible = true
                     fabCreateMony.isVisible = true
+                    ctnTotalView.isVisible = true
                 }
             }
             val categoriesFromDbUiData = categoriesFromDb.map {
@@ -181,12 +191,18 @@ class MainActivity : AppCompatActivity() {
                         false
                     )
                 )
+                ctnTotalView.isVisible = true //tentativa1
+            } else {
+                withContext(Dispatchers.Main) {
+                    ctnTotalView.isVisible = false //tentativa1
+                }
             }
             tempCatList.addAll(categoriesFromDbUiData)
-
+            val valor = getTotalValue()
             withContext(Dispatchers.Main) {
                 catss = tempCatList
                 catListAdapter.submitList(catss)
+                tvTotal.text = String.format("$%,.2f", valor)
             }
         }
     }
@@ -202,11 +218,11 @@ class MainActivity : AppCompatActivity() {
                 monyy = monyFromDbUiData
                 monyListAdapter.submitList(monyy)
             }
-            getCatFromDB()//eu adicionei essa chamada, somente para lidar com a adição de "all" de maneira responsiva
+            getCatFromDB()
         }
     }
 
-    private suspend fun filterMonyByCatName(category: String, monyListAdapter:MonyListAdapter) {
+    private suspend fun filterMonyByCatName(category: String, monyListAdapter: MonyListAdapter) {
         var taskTemp: List<MonyUiData> = emptyList()
         withContext(Dispatchers.IO) {
             taskTemp = if (category != "ALL") {
@@ -262,7 +278,10 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun showCreateUpdateMonyBottomSheet(monyUiData: MonyUiData? = null, monyListAdapter: MonyListAdapter) {
+    private fun showCreateUpdateMonyBottomSheet(
+        monyUiData: MonyUiData? = null,
+        monyListAdapter: MonyListAdapter
+    ) {
         val createOrUpdateMonyBottomSheet = CreateOrUpdateMonyBottomSheet(catsEnt,
             monyUiData,
             onCreateClicked = { monyToBeCreated ->
@@ -270,9 +289,9 @@ class MainActivity : AppCompatActivity() {
                     id = 0,
                     name = monyToBeCreated.name,
                     category = monyToBeCreated.category,
-                    value = 2.0
+                    value = monyToBeCreated.value
                 )
-                insertMony(monyEntityToBeInsert,monyListAdapter)
+                insertMony(monyEntityToBeInsert, monyListAdapter)
             },
             onUpdateClicked = { monyToBeUpdated ->
                 val monyyToBeUpdated = MonyEntity(
@@ -281,7 +300,7 @@ class MainActivity : AppCompatActivity() {
                     category = monyToBeUpdated.category,
                     value = monyToBeUpdated.value
                 )
-                updateMony(monyyToBeUpdated,monyListAdapter)
+                updateMony(monyyToBeUpdated, monyListAdapter)
             },
             onDeleteClicked = { monyToBeDeleted ->
                 val monyyToBeDeleted: MonyEntity = MonyEntity(
@@ -290,7 +309,7 @@ class MainActivity : AppCompatActivity() {
                     category = monyToBeDeleted.category,
                     value = monyToBeDeleted.value
                 )
-                deleteMony(monyyToBeDeleted,monyListAdapter)
+                deleteMony(monyyToBeDeleted, monyListAdapter)
             })
         createOrUpdateMonyBottomSheet.show(supportFragmentManager, "createMonyBottomSheet")
     }
@@ -310,6 +329,17 @@ class MainActivity : AppCompatActivity() {
         createCategoryBottomSheet.show(supportFragmentManager, "createCategoryBottomSheet")
     }
 
+    private suspend fun getTotalValue(category: String? = null): Double {
+        var categoria: String? = null
+        if (category != "ALL" && category != "+") {
+            categoria = category
+        }
+        val total: Double
+        withContext(Dispatchers.IO) {
+            total = monyDao.getTotalValue(categoria)
+        }
+        return total
+    }
 }
 
 fun createLabels(context: Context): Pair<List<Cor>, List<Icon>> {

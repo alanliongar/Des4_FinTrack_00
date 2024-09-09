@@ -1,11 +1,9 @@
 package com.example.fintrack
 
-import androidx.core.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.core.content.ContextCompat.getDrawable
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -28,14 +26,11 @@ class IconAdapter : ListAdapter<Icon, IconAdapter.IconViewHolder>(IconAdapter) {
 
     class IconViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         val imageView =
-            view.findViewById<ImageView>(R.id.iv_imagem) // Ajuste o ID conforme sua View
+            view.findViewById<ImageView>(R.id.iv_imagem)
         val imageShape = view.findViewById<ImageView>(R.id.iv_shape)
         fun bind(icon: Icon, onClick: (Icon) -> Unit) {
-            // Configure o ImageView com o drawable
             imageView.setImageResource(icon.icone)
-            // Atualize o estado selecionado do ImageView
             imageShape.isSelected = icon.isSelected
-            // Defina o fundo do ImageView como um ShapeDrawable
             imageShape.setBackgroundResource(R.drawable.drawable_icon)
             view.rootView.setOnClickListener {
                 onClick.invoke(icon)

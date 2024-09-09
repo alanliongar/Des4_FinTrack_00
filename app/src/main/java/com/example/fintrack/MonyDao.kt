@@ -29,4 +29,7 @@ interface MonyDao {
 
     @Delete
     fun deleteAll(monyEntity: List<MonyEntity>)
+
+    @Query("SELECT SUM(val) FROM MonyEntity WHERE (:category IS NULL OR cat = :category)")
+    fun getTotalValue(category: String?): Double
 }

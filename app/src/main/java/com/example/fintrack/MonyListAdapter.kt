@@ -73,7 +73,6 @@ class MonyListAdapter(val catDao: CatDao, val lifecycleOwner: LifecycleOwner) :
                 onLongClick.invoke(mony)
                 true
             }
-            //resColor.setBackgroundColor(R.color.red) -> Aqui devo incluir a cor bonitinha, que é da categoria.
         }
     }
 
@@ -85,6 +84,5 @@ class MonyListAdapter(val catDao: CatDao, val lifecycleOwner: LifecycleOwner) :
         override fun areContentsTheSame(oldItem: MonyUiData, newItem: MonyUiData): Boolean {
             return oldItem.name == newItem.name && oldItem.category == newItem.category && oldItem.value == newItem.value
         }
-
     }
 }

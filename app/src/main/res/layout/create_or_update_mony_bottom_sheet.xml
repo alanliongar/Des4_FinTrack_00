@@ -49,7 +49,7 @@
             android:id="@+id/tie_mony_value"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:inputType="numberDecimal"
+            android:inputType="numberSigned|numberDecimal"
             android:hint="Input the value here. Ex: -120.00" />
 
     </com.google.android.material.textfield.TextInputLayout>
