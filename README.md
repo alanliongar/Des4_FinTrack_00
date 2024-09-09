@@ -3,19 +3,34 @@ Esse projeto é um aplicativo android nativo, desenvolvido com a linguagem de pr
 
 ## :camera_flash: Screenshots
 <p float="left">
-  <img src="https://github.com/alanliongar/Des2_tipo_calculation/blob/master/TipCalculation01.png" width="250" />
-  <img src="https://github.com/alanliongar/Des2_tipo_calculation/blob/master/TipCalculation02.png" width="250" /> 
+  <img src="https://github.com/alanliongar/Des4_FinTrack_00/blob/main/Screenshots/Screenshot_20240909_130648.png" width="250" />
+  <img src="https://github.com/alanliongar/Des4_FinTrack_00/blob/main/Screenshots/Screenshot_20240909_130742.png" width="250" /> 
+  <img src="https://github.com/alanliongar/Des4_FinTrack_00/blob/main/Screenshots/Screenshot_20240909_130816.png" width="250" /> 
+  <br>
+  <img src="https://github.com/alanliongar/Des4_FinTrack_00/blob/main/Screenshots/Screenshot_20240909_130957.png" width="250" /> 
+  <img src="https://github.com/alanliongar/Des4_FinTrack_00/blob/main/Screenshots/Screenshot_20240909_131028.png" width="250" /> 
+  <img src="https://github.com/alanliongar/Des4_FinTrack_00/blob/main/Screenshots/Screenshot_20240909_131041.png" width="250" /> 
 </p>
 
 ## Tecnologias
 - Activity
+- Spinner
+- BottomSheet
+- Room Database
+- Kotlin
+  - Suspend function
+  - lifeCycleOwner
+  - GlobalScope
 - ViewGroups
   - ConstraintLayout
+  - LinearLayout
 - Views
   - ImageView
   - TextView
   - EditText
   - Button
+  - Recyclerview
+  - Resources (Colors and icons)
 
 ## License
 ```
