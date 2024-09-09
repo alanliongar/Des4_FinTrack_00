@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <!-- Estado selecionado -->
+    <item android:state_selected="true">
+        <layer-list>
+            <!-- O shape oval com borda -->
+            <item>
+                <shape android:shape="oval">
+                    <solid tools:color="@color/brown" />
+                    <stroke
+                        android:width="0.5dp"
+                        android:color="@color/fill_ico" />
+                    <size android:width="50dp" android:height="50dp" />
+                </shape>
+            </item>
+            <item android:drawable="@drawable/check" />
+        </layer-list>
+    </item>
+
+    <!-- Estado não selecionado -->
+    <item>
+        <shape android:shape="oval">
+            <solid tools:color="@color/brown" />
+            <stroke
+                android:width="0.5dp"
+                android:color="@color/fill_ico" />
+            <size android:width="50dp" android:height="50dp" />
+        </shape>
+    </item>
+
+</selector>
