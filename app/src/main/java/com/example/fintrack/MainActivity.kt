@@ -32,8 +32,8 @@ class MainActivity : AppCompatActivity() {
 
     private val db by lazy {
         Room.databaseBuilder(
-            applicationContext, FinTrackDataBase::class.java, "samba-lele-oeee-oee-sum"
-        ).fallbackToDestructiveMigrationFrom().build()
+            applicationContext, FinTrackDataBase::class.java, "desafio-fintrack-over"
+        ).build()
     }
     private val catDao: CatDao by lazy {
         db.getCatDao()
@@ -45,7 +45,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val (dados, categories) = createObjects(applicationContext)
         val (cores, icones) = createLabels(applicationContext)
         rvMony = findViewById(R.id.rv_dados)
         ctnEmptyView = findViewById(R.id.ll_empty_view)
@@ -73,8 +72,6 @@ class MainActivity : AppCompatActivity() {
 
 
         GlobalScope.launch(Dispatchers.Main) {
-            insertDefaultCat(categories)
-            insertDefaultMony(dados)
             getMonyFromDB(monyListAdapter)
             getCatFromDB()
         }
@@ -374,41 +371,4 @@ fun createLabels(context: Context): Pair<List<Cor>, List<Icon>> {
         Icon("wifi", R.drawable.wifi, false),
     )
     return Pair(cores.toList(), icones.toList())
-}
-
-fun createObjects(context: Context): Pair<List<MonyUiData>, List<CatUiData>> {
-    val dados = listOf(
-        MonyUiData(1, "Wifi", "Internet", -130.00),
-        MonyUiData(2, "Eletricity bill", "Utilities", -131.00),
-        MonyUiData(3, "Gas Station", "Car", -132.00),
-        MonyUiData(4, "Water bill", "Utilities", -133.00),
-        MonyUiData(5, "Rent", "House", -134.00)
-    )
-    val categories = listOf(
-        CatUiData(
-            "Internet",
-            ContextCompat.getColor(context, R.color.violet),
-            requireNotNull(R.drawable.wifi),
-            false
-        ),
-        CatUiData(
-            "Car",
-            ContextCompat.getColor(context, R.color.red),
-            requireNotNull(R.drawable.carro),
-            false
-        ),
-        CatUiData(
-            "Utilities",
-            ContextCompat.getColor(context, R.color.blue),
-            requireNotNull(R.drawable.joystick),
-            false
-        ),
-        CatUiData(
-            "House",
-            ContextCompat.getColor(context, R.color.green),
-            requireNotNull(R.drawable.casa),
-            false
-        )
-    )
-    return Pair(dados.toList(), categories.toList())
 }
