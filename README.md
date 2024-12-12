@@ -1,5 +1,5 @@
-# Aplicativo Fintrack
-Esse projeto é um aplicativo android nativo, desenvolvido com a linguagem de programação Kotlin, tem como principal funcionalidade ajudar o usuário a fazer uma gestão inteligente de suas entradas e saídas financeiras, bem como calcular o resultado final de tais entradas/saídas.
+# Fintrack app
+This project is a native Android application developed using the Kotlin programming language. Its main functionality is to help users intelligently manage their financial income and expenses, as well as calculate the final balance of these transactions.
 
 ## :camera_flash: Screenshots
 <p float="left">
@@ -12,7 +12,7 @@ Esse projeto é um aplicativo android nativo, desenvolvido com a linguagem de pr
   <img src="https://github.com/alanliongar/Des4_FinTrack_00/blob/main/Screenshots/Screenshot_20240909_131041.png" width="250" /> 
 </p>
 
-## Tecnologias
+## Technologies
 - Activity
 - Spinner
 - BottomSheet
