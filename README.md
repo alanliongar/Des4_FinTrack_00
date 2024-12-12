@@ -4,7 +4,7 @@ Esse projeto é um aplicativo android nativo, desenvolvido com a linguagem de pr
 ## :camera_flash: Screenshots
 <p float="left">
   <img src="https://github.com/alanliongar/Des4_FinTrack_00/blob/main/Screenshots/Screenshot_20240909_130648.png" width="250" />
-  <img src="https://github.com/user-attachments/assets/a75e5a6d-78c0-4553-86fc-c38906615ebb" width="250" /> 
+  <img src="https://github.com/alanliongar/Des4_FinTrack_00/blob/main/Screenshots/Screenshot_20240909_130742.png" width="250" /> 
   <img src="https://github.com/alanliongar/Des4_FinTrack_00/blob/main/Screenshots/Screenshot_20240909_130816.png" width="250" /> 
   <br>
   <img src="https://github.com/alanliongar/Des4_FinTrack_00/blob/main/Screenshots/Screenshot_20240909_130957.png" width="250" /> 
